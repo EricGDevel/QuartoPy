@@ -52,6 +52,7 @@ def minimax(button_list, piece, pieces_set, depth, player=Player.COMPUTER):
     :param piece:           The piece to use in the turn
     :param pieces_set:      A set of all piece that can be played
     :param depth:           The maximum recursion depth for the function
+    :param player:          The player to play as
     :return:                The indexes of the best move for the computer (Maximising player)
     """
     board = convert(button_list)
@@ -122,10 +123,12 @@ def make_move(board, player, piece, pieces_set, alpha, beta, depth, idepth):
         return val
     options = get_options(board, piece, pieces_set)
     rival = Player.HUMAN if player == Player.COMPUTER else Player.COMPUTER
+    new_set = deepcopy(pieces_set)
+    new_set.remove(piece)
     best_index = options[0].index
-    best_score = make_move(options[0].gamestate, rival, options[0].piece,  alpha, beta, depth - 1, idepth)
+    best_score = make_move(options[0].gamestate, rival, options[0].piece, new_set, alpha, beta, depth - 1, idepth)
     for option in options[1:]:
-        score = make_move(option.gamestate, rival, option.piece,  alpha, beta, depth - 1, idepth)
+        score = make_move(option.gamestate, rival, option.piece, new_set, alpha, beta, depth - 1, idepth)
         if better_move(player, score, best_score):
             best_index = option.index
             best_score = score
