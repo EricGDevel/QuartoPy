@@ -1,0 +1,14 @@
+#: kivy 1.11.0
+
+<Board>:
+    spacing: 2, 2
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Cell>:
+    allow_stretch: True
+    keep_ratio: True
