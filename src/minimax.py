@@ -1,73 +1,87 @@
+"""
+Module minimax.py
+=================
+
+Contains all AI functions that allow the computer to make the best move.
+Uses the minimax algorithm with alpha-beta pruning.
+"""
+
+__all__ = ['convert', 'evaluate', 'is_full', 'minimax', 'pick_piece']
+__version__ = '0.0'
+__author__ = 'Eric G.D'
+
 from copy import deepcopy
 from math import inf
-from src.piece import Piece
-from src.enums import Player
+from typing import List, Set, Tuple, Union
+
+from src.constants import Player
 from src.option import Option
+from src.piece import *
 
 MAX_SCORE = 10 ** 5
 
 
-def convert(button_list):
+def convert(cell_list: List[Cell]) -> List[Piece]:
     """
-    :param button_list:     The list of all buttons in Board
-    :return:                A simplified version of :button_list:
+    :param cell_list:       The list of all buttons in Board
+    :return:                A simplified version of :cell_list:
     """
-    return [[cell.piece for cell in row] for row in button_list]
+    return [[cell.piece for cell in row] for row in cell_list]
 
 
-def is_full(board):
+def is_full(board: List[Piece]) -> bool:
     """
-    :param board:   The current gamestate/Set of pieces that can be played
+    :param board:   The current gamestate
     :return:        True if the board is full, false otherwise
     """
     if isinstance(board, list):
         return not any([piece is None for row in board for piece in row])
-    if isinstance(board, set):
-        return len(board) == 0
     raise TypeError(":board: must be a board list or the set of available pieces!")
 
 
-def evaluate(board, player=Player.COMPUTER):
+def evaluate(board: List[Piece], player: Player = Player.COMPUTER) -> float:
     """
     :param board:   The current gamestate
     :param player:  The player to evaluate for
     :return:        :board:'s ranking
     """
-    pass
+    ...
 
 
-def pick_piece(button_list, pieces_set, depth):
+def pick_piece(cell_list: List[Cell], pieces_set: Set[int], depth: int) -> Piece:
     """
-    :param button_list: A 2D List containing the board's buttons
+    :param cell_list:   A 2D List containing the board's buttons
     :param pieces_set:  A set containing which pieces can be played
     :param depth:       The maximum recursion depth for the function
     :return:            Which piece the computer should play
     """
-    pass
+    ...
 
 
-def minimax(button_list, piece, pieces_set, depth, player=Player.COMPUTER):
+def minimax(cell_list: List[Piece], piece: Piece, pieces_set: Set[int],
+            depth: int, player: Player = Player.COMPUTER) -> Tuple[int, int]:
     """
-    :param button_list:     A matrix containing the buttons in the game_board
+    :param cell_list:       A matrix containing the buttons in the game_boardS
     :param piece:           The piece to use in the turn
     :param pieces_set:      A set of all piece that can be played
     :param depth:           The maximum recursion depth for the function
     :param player:          The player to play as
     :return:                The indexes of the best move for the computer (Maximising player)
     """
-    board = convert(button_list)
+    board = convert(cell_list)
     if depth <= 0:
-        return pick_best(board, player, pieces_set, piece)
+        return pick_best(board, piece, pieces_set, player)
     alpha = -inf
     beta = inf
-    return make_move(board, piece, pieces_set, Player.COMPUTER, alpha, beta, depth, depth)
+    return make_move(board, player, piece, pieces_set, alpha, beta, depth, depth)
 
 
-def pick_best(board, piece, pieces_set, player=Player.COMPUTER):
+def pick_best(board: List[Piece], piece: Piece,
+              pieces_set: Set[int], player: Player = Player.COMPUTER) -> Tuple[int, int]:
     """
     :param board:       The current gamestate
-    :param pieces_set:  A set of available pieces to play
     :param piece:       The piece to insert
+    :param pieces_set:  A set of available pieces to play
     :param player:      The player to pick the best move for
     :return:            The move with the highest score
     """
@@ -79,17 +93,17 @@ def pick_best(board, piece, pieces_set, player=Player.COMPUTER):
     return options[scores.index(best_score)]
 
 
-def get_options(board, piece, available_pieces):
+def get_options(board: List[Piece], piece: Piece, pieces_set: Set[int]) -> List[Option]:
     """
     :param board:               The current gamestate
     :param piece:               The piece to insert
-    :param available_pieces:    A set containing all playable moves
+    :param pieces_set:          A set containing all playable moves
     :return:                    A list of all possible moves
     """
-    if not isinstance(piece, Piece) or not isinstance(available_pieces, set):
-        raise TypeError(":piece: needs to be a Piece object and :available_pieces: needs to be a set!")
-    if piece not in available_pieces:
-        raise ValueError(":piece: has to be in :available_pieces:!")
+    if not isinstance(piece, Piece) or not isinstance(pieces_set, set):
+        raise TypeError(":piece: needs to be a Piece object and :pieces_set: needs to be a set!")
+    if piece not in pieces_set:
+        raise ValueError(":piece: has to be in :pieces_set:!")
     out = []
     for i in range(len(board)):
         for j in range(len(board[i])):
@@ -97,14 +111,15 @@ def get_options(board, piece, available_pieces):
                 option = deepcopy(board)
                 option[i][j] = piece
                 # TODO: Optimise this section using pick_best instead of iteration over all possible pieces
-                for next_piece in available_pieces:
+                for next_piece in pieces_set:
                     if next_piece is piece:
                         continue
                     out.append(Option(option, (i, j), next_piece))
     return out
 
 
-def make_move(board, player, piece, pieces_set, alpha, beta, depth, idepth):
+def make_move(board: List[Piece], player: Player, piece: Piece, pieces_set: Set[int],
+              alpha: float, beta: float, depth: int, idepth: int) -> Union[float, Tuple[int, int]]:
     """
     :param board:       The current gamestate
     :param player:      The player to play as
@@ -142,7 +157,7 @@ def make_move(board, player, piece, pieces_set, alpha, beta, depth, idepth):
     return best_score if depth != idepth else best_index
 
 
-def better_move(player, score, best_score):
+def better_move(player: Player, score: float, best_score: float) -> bool:
     """
     :param player:      Tells the computer if looking for min or max scores (str, Player.HUMAN/Player.COMPUTER)
     :param score:       The new score

@@ -1,4 +1,16 @@
+"""
+Module piece.py
+===============
+
+Contains the declarations of the Piece and Cell classes.
+"""
+
+__all__ = ['Piece', 'Cell']
+__version__ = '0.0'
+__author__ = 'Eric G.D'
+
 import os
+from typing import Any, Optional, Union
 
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
@@ -10,7 +22,7 @@ class Piece:
     NUM_OF_BITS = 4
     MAX_NUM = (2 ** NUM_OF_BITS) - 1
 
-    def __init__(self, num):
+    def __init__(self, num: int) -> None:
         if not isinstance(num, int):
             raise TypeError(':num: needs to be an integer!')
         if not 0 <= num <= Piece.MAX_NUM:
@@ -19,48 +31,53 @@ class Piece:
         self.__attributes = tuple([bool(int(bit)) for bit in ('{0:0=%db}' % Piece.NUM_OF_BITS).format(num)])
         self.__image = os.path.join('..', 'assets', f'piece_{str(num).zfill(2)}.png')
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, Piece) and other.__id == self.__id
 
     @property
-    def isLarge(self):
+    def isLarge(self) -> bool:
         return self.__attributes[0]
 
     @property
-    def isRound(self):
+    def isRound(self) -> bool:
         return self.__attributes[1]
 
     @property
-    def isHollow(self):
+    def isHollow(self) -> bool:
         return self.__attributes[2]
 
     @property
-    def isWhite(self):
+    def isWhite(self) -> bool:
         return self.__attributes[3]
 
     @property
-    def image(self):
+    def image(self) -> str:
         return self.__image
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self.__id
 
 
 class Cell(ButtonBehavior, Image):
 
-    def __init__(self):
+    def __init__(self, piece: Optional[int, Piece] = None):
         ButtonBehavior.__init__(self)
         Image.__init__(self)
-        self.__piece = None
-        self.source = Piece.BLANK_IMAGE
+        if isinstance(piece, int):
+            piece = Piece(piece)
+        self.__piece = piece
+        try:
+            self.source = piece.source if piece is not None else Piece.BLANK_IMAGE
+        except AttributeError:
+            raise TypeError(":piece: can only be None, int, or Piece!")
 
     @property
-    def piece(self):
+    def piece(self) -> Piece:
         return self.__piece
 
     @piece.setter
-    def piece(self, p):
+    def piece(self, p: Union[None, int, Piece]) -> None:
         if p is None:
             self.__piece = p
             self.source = Piece.BLANK_IMAGE
