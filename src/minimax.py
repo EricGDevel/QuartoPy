@@ -21,7 +21,7 @@ from src.piece import *
 MAX_SCORE = 10 ** 5
 
 
-def convert(cell_list: List[Cell]) -> List[Piece]:
+def convert(cell_list: List[List[Cell]]) -> List[List[Piece]]:
     """
     :param cell_list:       The list of all buttons in Board
     :return:                A simplified version of :cell_list:
@@ -29,7 +29,7 @@ def convert(cell_list: List[Cell]) -> List[Piece]:
     return [[cell.piece for cell in row] for row in cell_list]
 
 
-def is_full(board: List[Piece]) -> bool:
+def is_full(board: List[List[Piece]]) -> bool:
     """
     :param board:   The current gamestate
     :return:        True if the board is full, false otherwise
@@ -39,7 +39,7 @@ def is_full(board: List[Piece]) -> bool:
     raise TypeError(":board: must be a board list or the set of available pieces!")
 
 
-def evaluate(board: List[Piece], player: Player = Player.COMPUTER) -> float:
+def evaluate(board: List[List[Piece]], player: Player = Player.COMPUTER) -> float:
     """
     :param board:   The current gamestate
     :param player:  The player to evaluate for
@@ -48,7 +48,7 @@ def evaluate(board: List[Piece], player: Player = Player.COMPUTER) -> float:
     ...
 
 
-def pick_piece(cell_list: List[Cell], pieces_set: Set[int], depth: int) -> Piece:
+def pick_piece(cell_list: List[List[Cell]], pieces_set: Set[Piece], depth: int) -> Piece:
     """
     :param cell_list:   A 2D List containing the board's buttons
     :param pieces_set:  A set containing which pieces can be played
@@ -58,7 +58,7 @@ def pick_piece(cell_list: List[Cell], pieces_set: Set[int], depth: int) -> Piece
     ...
 
 
-def minimax(cell_list: List[Piece], piece: Piece, pieces_set: Set[int],
+def minimax(cell_list: List[List[Cell]], piece: Piece, pieces_set: Set[Piece],
             depth: int, player: Player = Player.COMPUTER) -> Tuple[int, int]:
     """
     :param cell_list:       A matrix containing the buttons in the game_boardS
@@ -76,8 +76,8 @@ def minimax(cell_list: List[Piece], piece: Piece, pieces_set: Set[int],
     return make_move(board, player, piece, pieces_set, alpha, beta, depth, depth)
 
 
-def pick_best(board: List[Piece], piece: Piece,
-              pieces_set: Set[int], player: Player = Player.COMPUTER) -> Tuple[int, int]:
+def pick_best(board: List[List[Piece]], piece: Piece,
+              pieces_set: Set[Piece], player: Player = Player.COMPUTER) -> Tuple[int, int]:
     """
     :param board:       The current gamestate
     :param piece:       The piece to insert
@@ -90,10 +90,10 @@ def pick_best(board: List[Piece], piece: Piece,
     options = get_options(board, piece, pieces_set)
     scores = [evaluate(option.gamestate) for option in options]
     best_score = max(scores) if player == Player.COMPUTER else min(scores)
-    return options[scores.index(best_score)]
+    return options[scores.index(best_score)].index
 
 
-def get_options(board: List[Piece], piece: Piece, pieces_set: Set[int]) -> List[Option]:
+def get_options(board: List[List[Piece]], piece: Piece, pieces_set: Set[Piece]) -> List[Option]:
     """
     :param board:               The current gamestate
     :param piece:               The piece to insert
@@ -118,7 +118,7 @@ def get_options(board: List[Piece], piece: Piece, pieces_set: Set[int]) -> List[
     return out
 
 
-def make_move(board: List[Piece], player: Player, piece: Piece, pieces_set: Set[int],
+def make_move(board: List[List[Piece]], player: Player, piece: Piece, pieces_set: Set[Piece],
               alpha: float, beta: float, depth: int, idepth: int) -> Union[float, Tuple[int, int]]:
     """
     :param board:       The current gamestate

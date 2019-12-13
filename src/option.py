@@ -21,17 +21,16 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, gamestate: List[Piece], index: Tuple[int, int], piece: Piece) -> None:
+    def __init__(self, gamestate: List[List[Piece]], index: Tuple[int, int], piece: Piece) -> None:
         self.__gamestate = gamestate
         self.__index = index
         self.__piece = piece
 
     def __str__(self) -> str:
-        as_dict = self.__dict__()
-        return 'Option({})'.format(', '.join([f"{k}: {v}" for k, v in as_dict.items()]))
+        return 'Option({})'.format(', '.join([f"{k}: {v}" for k, v in self.__dict__.items()]))
 
     @property
-    def gamestate(self) -> Piece:
+    def gamestate(self) -> List[List[Piece]]:
         return self.__gamestate
 
     @property

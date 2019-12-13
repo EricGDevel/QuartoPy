@@ -34,6 +34,9 @@ class Piece:
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Piece) and other.__id == self.__id
 
+    def __hash__(self) -> int:
+        return hash(self.__id)
+
     @property
     def isLarge(self) -> bool:
         return self.__attributes[0]
@@ -68,7 +71,7 @@ class Cell(ButtonBehavior, Image):
             piece = Piece(piece)
         self.__piece = piece
         try:
-            self.source = piece.source if piece is not None else Piece.BLANK_IMAGE
+            self.source = piece.image if piece is not None else Piece.BLANK_IMAGE
         except AttributeError:
             raise TypeError(":piece: can only be None, int, or Piece!")
 
@@ -91,4 +94,3 @@ class Cell(ButtonBehavior, Image):
             self.source = self.__piece.image
         else:
             raise TypeError('Invalid type for :piece:!')
-

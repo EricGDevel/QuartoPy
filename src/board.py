@@ -110,10 +110,11 @@ class Board(GridLayout):
                            )
         self.popup.open()
 
-    def generate_popup_contents(self) -> BoxLayout:
+    def generate_popup_contents(self, message: str) -> BoxLayout:
         """
         Generates the contents for the end game popup
-        :return:    The contents of the popup
+        :param message: The message to display
+        :return:        The contents of the popup
         """
         ...
 

@@ -20,7 +20,7 @@ class GameScreen(Screen):
     Contains the main game's layout and connects all of the different widgets to each other.
     """
     def __init__(self, **kwargs):
-        super().init(name=kwargs['name'])
+        super().__init__(name=kwargs['name'])
         self.layout = BoxLayout(orientation='horizontal')
         self.board = Board(game_mode=kwargs.get('game_mode', GameMode.SINGLE_PLAYER),
                            first_player=kwargs.get('first_player', Player.HUMAN),
