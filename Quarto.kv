@@ -5,7 +5,7 @@
     spacing: 2, 2
     canvas:
         Color:
-            rgba: 1, 1, 1, 1
+            rgba: 0.2, 0.2, 0.2, 1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -14,8 +14,34 @@
     allow_stretch: True
     keep_ratio: True
 
+
 <PiecesBar>:
     orientation: 'horizontal'
+    canvas:
+        Color:
+            rgba: 0.8, 0.8, 0.8, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<EndMessage@Popup>:
+    title: 'Game Over!'
+    BoxLayout:
+        orientation: 'vertical'
+    Label:
+        text: ''
+        id: message
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            text: 'Play Again'
+            on_release:
+                # Add reset function
+        Button:
+            text: 'Main Menu'
+            on_release:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'sp'
 
 <MainMenuScreen>:
     BoxLayout:

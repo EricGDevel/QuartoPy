@@ -21,7 +21,7 @@ class GameScreen(Screen):
     """
     def __init__(self, **kwargs):
         super().__init__(name=kwargs['name'])
-        self.layout = BoxLayout(orientation='horizontal')
+        self.layout = BoxLayout(orientation='vertical')
         self.board = Board(game_mode=kwargs.get('game_mode', GameMode.SINGLE_PLAYER),
                            first_player=kwargs.get('first_player', Player.HUMAN),
                            difficulty=kwargs.get('difficulty', 'hard'))

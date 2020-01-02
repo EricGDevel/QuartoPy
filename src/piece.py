@@ -10,15 +10,14 @@ __version__ = '0.0'
 __author__ = 'Eric G.D'
 
 import os
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
 
 
 class Piece:
-
-    BLANK_IMAGE = ''
+    BLANK_IMAGE = os.path.join('assets', 'blank.png')
     NUM_OF_BITS = 4
     MAX_NUM = (2 ** NUM_OF_BITS) - 1
 
@@ -29,7 +28,7 @@ class Piece:
             raise ValueError(f':num: needs to be between 0 and {Piece.MAX_NUM}')
         self.__id = num
         self.__attributes = tuple([bool(int(bit)) for bit in ('{0:0=%db}' % Piece.NUM_OF_BITS).format(num)])
-        self.__image = os.path.join('..', 'assets', f'piece_{str(num).zfill(2)}.png')
+        self.__image = os.path.join('assets', f'piece_{str(num).zfill(2)}.png')
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Piece) and other.__id == self.__id
@@ -64,7 +63,7 @@ class Piece:
 
 class Cell(ButtonBehavior, Image):
 
-    def __init__(self, piece: Optional[int, Piece] = None):
+    def __init__(self, piece: Union[int, Piece] = None):
         ButtonBehavior.__init__(self)
         Image.__init__(self)
         if isinstance(piece, int):
@@ -73,7 +72,7 @@ class Cell(ButtonBehavior, Image):
         try:
             self.source = piece.image if piece is not None else Piece.BLANK_IMAGE
         except AttributeError:
-            raise TypeError(":piece: can only be None, int, or Piece!")
+            raise TypeError(f'{type(piece)} is an invalid type for :piece:!')
 
     @property
     def piece(self) -> Piece:
@@ -86,11 +85,11 @@ class Cell(ButtonBehavior, Image):
             self.source = Piece.BLANK_IMAGE
         elif isinstance(p, int):
             if not 0 <= p <= Piece.MAX_NUM:
-                raise ValueError(f':piece: needs to be between 0 and {Piece.MAX_NUM}')
+                raise ValueError(f':p: needs to be between 0 and {Piece.MAX_NUM}')
             self.__piece = Piece(p)
             self.source = self.__piece.image
         elif isinstance(p, Piece):
             self.__piece = p
             self.source = self.__piece.image
         else:
-            raise TypeError('Invalid type for :piece:!')
+            raise TypeError(f'{type(p)} is an invalid type for :p:!')

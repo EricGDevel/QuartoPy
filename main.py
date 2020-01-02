@@ -65,9 +65,9 @@ class QuartoApp(App):
         Sets up the program's logger
         :return:    None
         """
-        Config.set('kivy', 'log_maxfiles', 10)
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
-        Config.set('kivy', 'log_dir', os.getcwd())
+        Config.set('kivy', 'log_maxfiles', 10)
+        Config.set('kivy', 'log_dir', 'logs')
         Config.set('kivy', 'log_level', 'info')
         Config.set('kivy', 'log_enable', 1)
 

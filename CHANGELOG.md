@@ -2,7 +2,34 @@
 
 ## [Unreleased]
 
-# Pre-alpha [v0.1.0] - 2019-12-13
+
+# Pre-alpha [v0.2] - 2020-01-02
+
+
+### Added:
+- Implemented has_won, insert, insert_selected and reset functions
+
+### Changed:
+- Moved logs into /logs/ directory
+- Changed background color of the playing board and pieces bar
+- Redesigned pieces images so they look like they are in a tile and are easier to separate 
+- Created a new class for the endgame message and moved its declaration to the .kv file
+- Updated .gitignore
+- Implemented more explicit error messages
+- Minimax and it's helper functions now return an Option object
+- Restructured multiple files
+- Reformatted CHANGELOG
+
+### Fixed:
+- Fixed many bugs that prevented application from launching
+- Changed GameScreen's main BoxLayout orientation to vertical instead of horizontal
+- Changed the blank image so the game board looks more like the original Quarto game
+- Fixed multiple typing module errors
+
+
+# Pre-alpha [v0.1] - 2019-12-13
+
+
 ### Added:
 - Added basic logging
 - Added a kivy config file
@@ -17,7 +44,10 @@
 - Fixed _some_ minor bugs (Code still doesn't run)
 - Documented modules, classes and functions
 
-## Pre-alpha [v0.0.0] - 2019-11-19
+
+## Pre-alpha [v0.0] - 2019-11-19
+
+
 ### Added:
 - Added CHANGELOG.md
 - Added README.md

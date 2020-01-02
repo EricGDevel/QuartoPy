@@ -20,7 +20,10 @@ class Player(Enum):
     COMPUTER = 1
     HUMAN = -1
 
+    def __invert__(self):
+        return Player.COMPUTER if self != Player.COMPUTER else Player.HUMAN
+
 
 class Color(Enum):
     WHITE = (1, 1, 1, 1)
-    TINT = (0.5, 0.5, 0.5, 0.5)
+    SELECTED_TINT = (0.5, 0.5, 0.5, 0.5)

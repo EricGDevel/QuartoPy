@@ -6,27 +6,19 @@ Contains all AI functions that allow the computer to make the best move.
 Uses the minimax algorithm with alpha-beta pruning.
 """
 
-__all__ = ['convert', 'evaluate', 'is_full', 'minimax', 'pick_piece']
+__all__ = ['evaluate', 'is_full', 'has_won', 'minimax', 'pick_piece']
 __version__ = '0.0'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
 from math import inf
-from typing import List, Set, Tuple, Union
+from typing import List, Set, Union
 
 from src.constants import Player
 from src.option import Option
 from src.piece import *
 
 MAX_SCORE = 10 ** 5
-
-
-def convert(cell_list: List[List[Cell]]) -> List[List[Piece]]:
-    """
-    :param cell_list:       The list of all buttons in Board
-    :return:                A simplified version of :cell_list:
-    """
-    return [[cell.piece for cell in row] for row in cell_list]
 
 
 def is_full(board: List[List[Piece]]) -> bool:
@@ -39,13 +31,20 @@ def is_full(board: List[List[Piece]]) -> bool:
     raise TypeError(":board: must be a board list or the set of available pieces!")
 
 
-def evaluate(board: List[List[Piece]], player: Player = Player.COMPUTER) -> float:
+def has_won(board: List[List[Piece]]) -> bool:
     """
     :param board:   The current gamestate
-    :param player:  The player to evaluate for
+    :return:        True if the board is full, false otherwise
+    """
+    return evaluate(board) == MAX_SCORE
+
+
+def evaluate(board: List[List[Piece]]) -> float:
+    """
+    :param board:  The option to evaluate
     :return:        :board:'s ranking
     """
-    ...
+    pass
 
 
 def pick_piece(cell_list: List[List[Cell]], pieces_set: Set[Piece], depth: int) -> Piece:
@@ -58,17 +57,17 @@ def pick_piece(cell_list: List[List[Cell]], pieces_set: Set[Piece], depth: int) 
     ...
 
 
-def minimax(cell_list: List[List[Cell]], piece: Piece, pieces_set: Set[Piece],
-            depth: int, player: Player = Player.COMPUTER) -> Tuple[int, int]:
+def minimax(board, piece: Piece, pieces_set: Set[Piece],
+            depth: int, player: Player = Player.COMPUTER) -> Option:
     """
-    :param cell_list:       A matrix containing the buttons in the game_boardS
+    :param board:           The board object
     :param piece:           The piece to use in the turn
     :param pieces_set:      A set of all piece that can be played
     :param depth:           The maximum recursion depth for the function
     :param player:          The player to play as
     :return:                The indexes of the best move for the computer (Maximising player)
     """
-    board = convert(cell_list)
+    board = board.convert()
     if depth <= 0:
         return pick_best(board, piece, pieces_set, player)
     alpha = -inf
@@ -77,7 +76,7 @@ def minimax(cell_list: List[List[Cell]], piece: Piece, pieces_set: Set[Piece],
 
 
 def pick_best(board: List[List[Piece]], piece: Piece,
-              pieces_set: Set[Piece], player: Player = Player.COMPUTER) -> Tuple[int, int]:
+              pieces_set: Set[Piece], player: Player = Player.COMPUTER) -> Option:
     """
     :param board:       The current gamestate
     :param piece:       The piece to insert
@@ -88,9 +87,9 @@ def pick_best(board: List[List[Piece]], piece: Piece,
     if not isinstance(player, Player) or not isinstance(piece, Piece) or not isinstance(pieces_set, set):
         raise TypeError("One of the paramters is an invalid type!")
     options = get_options(board, piece, pieces_set)
-    scores = [evaluate(option.gamestate) for option in options]
+    scores = [evaluate(option.game_state) for option in options]
     best_score = max(scores) if player == Player.COMPUTER else min(scores)
-    return options[scores.index(best_score)].index
+    return options[scores.index(best_score)]
 
 
 def get_options(board: List[List[Piece]], piece: Piece, pieces_set: Set[Piece]) -> List[Option]:
@@ -119,7 +118,7 @@ def get_options(board: List[List[Piece]], piece: Piece, pieces_set: Set[Piece]) 
 
 
 def make_move(board: List[List[Piece]], player: Player, piece: Piece, pieces_set: Set[Piece],
-              alpha: float, beta: float, depth: int, idepth: int) -> Union[float, Tuple[int, int]]:
+              alpha: float, beta: float, depth: int, idepth: int) -> Union[float, Option]:
     """
     :param board:       The current gamestate
     :param player:      The player to play as
@@ -140,12 +139,12 @@ def make_move(board: List[List[Piece]], player: Player, piece: Piece, pieces_set
     rival = Player.HUMAN if player == Player.COMPUTER else Player.COMPUTER
     new_set = deepcopy(pieces_set)
     new_set.remove(piece)
-    best_index = options[0].index
-    best_score = make_move(options[0].gamestate, rival, options[0].piece, new_set, alpha, beta, depth - 1, idepth)
+    best_option = options[0]
+    best_score = make_move(options[0].game_state, rival, options[0].piece, new_set, alpha, beta, depth - 1, idepth)
     for option in options[1:]:
-        score = make_move(option.gamestate, rival, option.piece, new_set, alpha, beta, depth - 1, idepth)
+        score = make_move(option.game_state, rival, option.piece, new_set, alpha, beta, depth - 1, idepth)
         if better_move(player, score, best_score):
-            best_index = option.index
+            best_option = option
             best_score = score
         if alpha < best_score and player == Player.COMPUTER:
             alpha = best_score
@@ -154,7 +153,7 @@ def make_move(board: List[List[Piece]], player: Player, piece: Piece, pieces_set
         if beta <= alpha:
             break
     best_score = -best_score if player == Player.HUMAN else best_score
-    return best_score if depth != idepth else best_index
+    return best_score if depth != idepth else best_option
 
 
 def better_move(player: Player, score: float, best_score: float) -> bool:
@@ -164,4 +163,4 @@ def better_move(player: Player, score: float, best_score: float) -> bool:
     :param best_score:  The previous best score
     :return:            If :score: is better than :best_score:
     """
-    return score > best_score if player == Player.COMPUTER else score < best_score
+    return (score > best_score) if player == Player.COMPUTER else (score < best_score)

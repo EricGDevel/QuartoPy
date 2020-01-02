@@ -10,6 +10,8 @@ __all__ = ['Board', 'PiecesBar']
 __version__ = '0.0'
 __author__ = 'Eric G.D'
 
+from typing import List, Set
+
 from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -34,13 +36,22 @@ class Board(GridLayout):
                   'hard': 12, 'impossible': LENGTH ** 2}
     popup = None
 
+    @staticmethod
+    def generate_pieces_set() -> Set[Piece]:
+        """
+        Generates a set of all playable pieces
+        :return:    The generated set
+        """
+        Logger.debug('Init: Generated a new pieces_set.')
+        return set([Piece(num) for num in range(Board.LENGTH ** 2)])
+
     def __init__(self, **kwargs) -> None:
         super().__init__()
         self.rows = self.cols = Board.LENGTH
         self.first_player = self.current_player = kwargs.get('first_player', Player.HUMAN)
         self.game_mode = kwargs.get('game_mode', GameMode.SINGLE_PLAYER)
         self.depth = Board.DIFFICULTY[kwargs.get('difficulty', 'hard')]
-        self.pieces_set = set([Piece(num) for num in range(Board.LENGTH ** 2)])
+        self.pieces_set = Board.generate_pieces_set()
         self.cell_list = [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
         self.pieces_bar = None
         Logger.debug("Setup: Initialised new Board object")
@@ -83,18 +94,37 @@ class Board(GridLayout):
         Finds the best move for the computer and plays it
         :return:    None
         """
-        i, j = minimax(self.cell_list, self.pieces_bar.selected, self.pieces_set, self.depth)
+        option = minimax(self, self.pieces_bar.selected, self.pieces_set, self.depth)
+        i, j = option.index
         self.insert(self.cell_list[i][j], self.current_player)
-        Logger.debug('Application: Computer placed {} at {}'.format(self.pieces_bar, (i, j)))
+        Logger.debug('Application: Computer placed {} at {}'.format(self.pieces_bar, option.index))
         self.change_player()
 
-    def insert(self, cell: Cell, piece: Piece) -> None:
+    def insert(self, cell: Cell, piece: Cell) -> bool:
         """
         :param cell:    The cell to insert into
         :param piece:   The piece to insert
-        :return:        None
+        :return:        If the game has ended or not
         """
-        ...
+        cell.piece = piece.piece
+        cell.unbind(on_release=self.on_click)
+        converted = self.convert()
+        board_full = is_full(converted)
+        winning_move = has_won(converted)
+        game_over = board_full or winning_move
+        if game_over:
+            title = '{} wins!'.format(self.current_player) if winning_move else "It's a tie!"
+            self.end_message(title)
+        return game_over
+
+    def insert_selected(self, cell: Cell) -> bool:
+        """
+        Inserts the selected piece into cell
+        :param cell:    The cell to insert into
+        :return:        If the game has ended or not
+        """
+        assert self.pieces_bar.selected is not None
+        return self.insert(cell, self.pieces_bar.selected)
 
     def end_message(self, message: str) -> None:
         """
@@ -103,34 +133,31 @@ class Board(GridLayout):
         :return:        None
         """
         self.disabled = True
-        self.popup = Popup(title="Game Over!",
-                           content=self.generate_popup_contents(message),
-                           size_hint=(0.625, 0.625),
-                           auto_dismiss=False
-                           )
+        self.popup = EndMessage()
+        self.popup.ids.message.text = message
         self.popup.open()
-
-    def generate_popup_contents(self, message: str) -> BoxLayout:
-        """
-        Generates the contents for the end game popup
-        :param message: The message to display
-        :return:        The contents of the popup
-        """
-        ...
 
     def reset(self) -> None:
         """
         Starts a new game
         :return:    None
         """
-        ...
+        if self.popup is not None:
+            self.popup.dismiss()
+            self.popup = None
+        self.disabled = False
+        self.pieces_set = Board.generate_pieces_set()
+        self.initialise_buttons(reset=True)
+        self.first_player = self.current_player = (~self.first_player)
+        self.pieces_bar.reset()
+        self.first_move()
 
     def change_player(self) -> None:
         """
         Switches the current player
         :return:        None
         """
-        self.current_player = Player.COMPUTER if self.current_player != Player.COMPUTER else Player.HUMAN
+        self.current_player = (~self.current_player)  # Method defined in Player.__invert__()
 
     def on_click(self, touch) -> None:
         """
@@ -141,13 +168,18 @@ class Board(GridLayout):
         :return:        None
         """
         if self.pieces_bar.selected is not None:
-            game_over = self.insert(touch, self.pieces_bar.selected)
-            self.pieces_bar.remove_widget(self.pieces_bar.selected)
-            self.pieces_bar.selected = None
+            game_over = self.insert_selected(touch)
+            self.pieces_bar.deselect()
             if not game_over:
                 self.change_player()
                 if self.game_mode == GameMode.SINGLE_PLAYER:
                     self.computer_move()
+
+    def convert(self) -> List[List[Piece]]:
+        """
+        :return:                A simplified version of board
+        """
+        return [[cell.piece for cell in row] for row in self.cell_list]
 
 
 class PiecesBar(BoxLayout):
@@ -162,20 +194,29 @@ class PiecesBar(BoxLayout):
         super().__init__(**kwargs)
         self.board = board
         self.board.pieces_bar = self
+        self.board.disabled = False
         self.board.initialise_buttons()
         self.board.first_move()
-        self.board.disabled = False
         self.selected = None
         self.widgets = []
+        self.add_pieces()
+        self.confirm_button = Button(text='Confirm')
+        self.confirm_button.bind(on_release=self.confirm)
+        self.add_widget(self.confirm_button)
+        Logger.debug("Init: Initialised new PieceBar object.")
+
+    def add_pieces(self):
         for piece in self.board.pieces_set:
             widget = Cell(piece)
             widget.bind(on_release=self.select)
             self.widgets.append(widget)
             self.add_widget(widget)
-        self.confirm_button = Button(text='Confirm')
-        self.confirm_button.bind(self.confirm)
-        self.add_widget(self.confirm_button)
-        Logger.debug("Initialised new PieceBar object.")
+
+    def deselect(self):
+        assert self.selected is not None
+        self.widgets.remove(self.selected)
+        self.remove_widget(self.selected)
+        self.selected = None
 
     def confirm(self, touch) -> None:
         """
@@ -183,7 +224,8 @@ class PiecesBar(BoxLayout):
         :param touch:   The confirm button
         :return:        None
         """
-        ...
+        if self.selected is not None:
+            pass
 
     def select(self, touch) -> None:
         """
@@ -194,4 +236,14 @@ class PiecesBar(BoxLayout):
         if self.selected is not None:
             self.selected.color = Color.WHITE.value
         self.selected = touch
-        touch.color = Color.TINT.value
+        touch.color = Color.SELECTED_TINT.value
+
+    def reset(self) -> None:
+        while len(self.widgets) > 0:
+            self.remove_widget(self.widgets[0])
+            del self.widgets[0]
+        self.add_pieces()
+
+
+class EndMessage(Popup):
+    pass
