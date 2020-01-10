@@ -24,24 +24,27 @@
             pos: self.pos
             size: self.size
 
-<EndMessage@Popup>:
+<EndMessage>:
     title: 'Game Over!'
+    size_hint: 0.625, 0.625
+    auto_dismiss: False
     BoxLayout:
         orientation: 'vertical'
-    Label:
-        text: ''
-        id: message
-    BoxLayout:
-        orientation: 'horizontal'
-        Button:
-            text: 'Play Again'
-            on_release:
-                # Add reset function
-        Button:
-            text: 'Main Menu'
-            on_release:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'sp'
+        Label:
+            text: ''
+            id: message
+        BoxLayout:
+            orientation: 'horizontal'
+            Button:
+                text: 'Play Again'
+                on_release:
+                    app.sm.current_screen.board.reset()
+            Button:
+                text: 'Main Menu'
+                on_release:
+                    app.sm.current_screen.board.reset()
+                    app.sm.transition.direction = 'left'
+                    app.sm.current = 'menu'
 
 <MainMenuScreen>:
     BoxLayout:
@@ -49,13 +52,13 @@
         Button:
             text: 'Play'
             on_release:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'play'
+                app.sm.transition.direction = 'left'
+                app.sm.current = 'play'
         Button:
             text: 'Settings'
             # on_release:
-                # root.manager.transition.direction = 'right'
-                # root.manager.current = 'settings'
+                # app.sm.transition.direction = 'right'
+                # app.sm.current = 'settings'
         Button:
             text: 'Quit'
             on_release: sysexit(0)
@@ -66,17 +69,17 @@
         Button:
             text: 'Single-player'
             on_release:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'sp'
+                app.sm.transition.direction = 'left'
+                app.sm.current = 'sp'
         Button:
             text: 'Multi-player'
             on_release:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'mp'
+                app.sm.transition.direction = 'left'
+                app.sm.current = 'mp'
         Button:
             text: 'Back'
             on_release:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'menu'
+                app.sm.transition.direction = 'right'
+                app.sm.current = 'menu'
 
 # <SettingsMenuScreen>:

@@ -5,7 +5,7 @@ Module main.py
 This module contains the main application and it's configuration
 """
 
-__version__ = '0.0'
+__version__ = '0.2'
 __author__ = 'Eric G.D'
 
 import os
@@ -29,24 +29,25 @@ class QuartoApp(App):
     This is an extension of the app class, used to start the Kivy program
     """
 
-    __sm = None
+    sm = None
+    current_board = None
     CONFIG_FILE = 'kivy_config.ini'
 
     @staticmethod
     def get_screen_manager() -> ScreenManager:
         """
         Initialises the program's ScreenManger and returns it
-        :return:    QuartoApp.__sm
+        :return:    QuartoApp.sm
         """
-        if QuartoApp.__sm is None:
-            QuartoApp.__sm = ScreenManager(transition=SlideTransition())
-            QuartoApp.__sm.add_widget(MainMenuScreen(name='menu'))
-            QuartoApp.__sm.add_widget(PlayMenuScreen(name='play'))
-            QuartoApp.__sm.add_widget(SettingsMenuScreen(name='settings'))
-            QuartoApp.__sm.add_widget(GameScreen(name='sp', game_mode=GameMode.SINGLE_PLAYER))
-            QuartoApp.__sm.add_widget(GameScreen(name='mp', game_mode=GameMode.MULTI_PLAYER))
-            Logger.debug("Setup: QuartoApp.__sm generated.")
-        return QuartoApp.__sm
+        if QuartoApp.sm is None:
+            QuartoApp.sm = ScreenManager(transition=SlideTransition())
+            QuartoApp.sm.add_widget(MainMenuScreen(name='menu'))
+            QuartoApp.sm.add_widget(PlayMenuScreen(name='play'))
+            QuartoApp.sm.add_widget(SettingsMenuScreen(name='settings'))
+            QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.SINGLE_PLAYER))
+            QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.MULTI_PLAYER))
+            Logger.debug("Setup: QuartoApp.sm generated.")
+        return QuartoApp.sm
 
     @staticmethod
     def set_cwd() -> None:
@@ -65,10 +66,11 @@ class QuartoApp(App):
         Sets up the program's logger
         :return:    None
         """
+        # TODO: Fix logging bugs (Multiple log files per run, not saving to logs/ folder)
+        Config.set('kivy', 'log_dir', os.path.join(os.getcwd(), 'logs'))
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
         Config.set('kivy', 'log_maxfiles', 10)
-        Config.set('kivy', 'log_dir', 'logs')
-        Config.set('kivy', 'log_level', 'info')
+        Config.set('kivy', 'log_level', 'debug')
         Config.set('kivy', 'log_enable', 1)
 
     def set_config(self) -> None:

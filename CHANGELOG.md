@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 
+### Added:
+- Implemented confirm function
+
+### Changed:
+- Moved is_full function from minimax into board.Board
+- Improved is_full efficiency by checking the number of pieces left in Board.pieces_bar rather than checking if every spot in the board isn't empty
+- Moved pieces_set from Board to PiecesBar
+- Fixed EndMessage errors and finished implementing it
+
+
 # Pre-alpha [v0.2] - 2020-01-02
 
 

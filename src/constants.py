@@ -26,4 +26,5 @@ class Player(Enum):
 
 class Color(Enum):
     WHITE = (1, 1, 1, 1)
-    SELECTED_TINT = (0.5, 0.5, 0.5, 0.5)
+    SELECTED_TINT = (0.5, 0.5, 0, 0.75)
+    CONFIRMED_TINT = (0, 0.5, 0, 0.75)

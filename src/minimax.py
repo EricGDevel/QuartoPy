@@ -6,8 +6,8 @@ Contains all AI functions that allow the computer to make the best move.
 Uses the minimax algorithm with alpha-beta pruning.
 """
 
-__all__ = ['evaluate', 'is_full', 'has_won', 'minimax', 'pick_piece']
-__version__ = '0.0'
+__all__ = ['evaluate', 'has_won', 'minimax', 'pick_piece']
+__version__ = '0.2'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
@@ -19,16 +19,6 @@ from src.option import Option
 from src.piece import *
 
 MAX_SCORE = 10 ** 5
-
-
-def is_full(board: List[List[Piece]]) -> bool:
-    """
-    :param board:   The current gamestate
-    :return:        True if the board is full, false otherwise
-    """
-    if isinstance(board, list):
-        return not any([piece is None for row in board for piece in row])
-    raise TypeError(":board: must be a board list or the set of available pieces!")
 
 
 def has_won(board: List[List[Piece]]) -> bool:
@@ -44,7 +34,7 @@ def evaluate(board: List[List[Piece]]) -> float:
     :param board:  The option to evaluate
     :return:        :board:'s ranking
     """
-    pass
+    ...
 
 
 def pick_piece(cell_list: List[List[Cell]], pieces_set: Set[Piece], depth: int) -> Piece:
@@ -133,7 +123,7 @@ def make_move(board: List[List[Piece]], player: Player, piece: Piece, pieces_set
     val = evaluate(board)
     if abs(val) == MAX_SCORE:
         return val * (depth + 1)
-    if depth == 0 or is_full(board):
+    if depth == 0 or len(pieces_set) == 0:
         return val
     options = get_options(board, piece, pieces_set)
     rival = Player.HUMAN if player == Player.COMPUTER else Player.COMPUTER
