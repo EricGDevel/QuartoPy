@@ -5,7 +5,7 @@ Module main.py
 This module contains the main application and it's configuration
 """
 
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'Eric G.D'
 
 import os
@@ -16,6 +16,7 @@ from kivy.config import Config
 from kivy.logger import Logger
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
+from src.keyboard import Keyboard
 from src.screens import *
 
 kivy.require('1.11.0')
@@ -30,7 +31,7 @@ class QuartoApp(App):
     """
 
     sm = None
-    current_board = None
+    keyboard = None
     CONFIG_FILE = 'kivy_config.ini'
 
     @staticmethod
@@ -43,9 +44,9 @@ class QuartoApp(App):
             QuartoApp.sm = ScreenManager(transition=SlideTransition())
             QuartoApp.sm.add_widget(MainMenuScreen(name='menu'))
             QuartoApp.sm.add_widget(PlayMenuScreen(name='play'))
-            QuartoApp.sm.add_widget(SettingsMenuScreen(name='settings'))
-            QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.SINGLE_PLAYER))
-            QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.MULTI_PLAYER))
+            # TODO: Remove redundant extra screen and have the screen get the game mode when the mode button is pressed
+            QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.single_player))
+            QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.multi_player))
             Logger.debug("Setup: QuartoApp.sm generated.")
         return QuartoApp.sm
 
@@ -58,7 +59,6 @@ class QuartoApp(App):
         """
         path = os.path.dirname(os.path.realpath(__file__))
         os.chdir(path)
-        Config.set('kivy', 'window_icon', os.path.join('assets', 'icon.png'))
 
     @staticmethod
     def setup_logging() -> None:
@@ -67,10 +67,10 @@ class QuartoApp(App):
         :return:    None
         """
         # TODO: Fix logging bugs (Multiple log files per run, not saving to logs/ folder)
-        Config.set('kivy', 'log_dir', os.path.join(os.getcwd(), 'logs'))
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
+        Config.set('kivy', 'log_dir', os.path.join(os.getcwd(), 'logs'))
         Config.set('kivy', 'log_maxfiles', 10)
-        Config.set('kivy', 'log_level', 'debug')
+        Config.set('kivy', 'log_level', 'info')
         Config.set('kivy', 'log_enable', 1)
 
     def set_config(self) -> None:
@@ -81,20 +81,22 @@ class QuartoApp(App):
         QuartoApp.set_cwd()
         config_exists = os.path.isfile(QuartoApp.CONFIG_FILE)
         Config.read(QuartoApp.CONFIG_FILE)
-        QuartoApp.setup_logging()
         if not config_exists:
-            Config.set('kivy', 'exit_on_escape', 1)
-            Config.set('graphics', 'full_screen', 'auto')
+            QuartoApp.setup_logging()
+            Config.set('kivy', 'exit_on_escape', 0)
+            Config.set('graphics', 'fullscreen', 0)
+            Logger.debug("Setup: Config generated.")
         Config.write()
-        Logger.debug("Setup: Config generated.")
         self.title = 'Quarto'
+        self.icon = os.path.join('assets', 'icon.png')
 
     def build(self) -> ScreenManager:
         """
         Starts the program
-        :return:    None
+        :return:    The application's ScreenManager
         """
         self.set_config()
+        QuartoApp.keyboard = Keyboard(self)
         return QuartoApp.get_screen_manager()
 
 

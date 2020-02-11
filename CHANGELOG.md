@@ -1,12 +1,17 @@
 # CHANGELOG
 
-## [Unreleased]
+## Alpha [v0.3] - 2020-02-11
 
 
 ### Added:
 - Implemented confirm function
+- Implemented evaluation function
+- get_options sorts similar moves together and sorts groups of moves by score
+- Added keyboard controls
+- Refactored and documented code
 
 ### Changed:
+- Replaced piece images with higher resolution versions
 - Moved is_full function from minimax into board.Board
 - Improved is_full efficiency by checking the number of pieces left in Board.pieces_bar rather than checking if every spot in the board isn't empty
 - Moved pieces_set from Board to PiecesBar

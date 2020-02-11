@@ -5,23 +5,23 @@ Module constants.py
 This module contains all the enums and constants used by the other modules of the project
 """
 
-__version__ = '0.0'
+__version__ = '0.3'
 __author__ = 'Eric G.D'
 
 from enum import Enum
 
 
 class GameMode(Enum):
-    SINGLE_PLAYER = 0
-    MULTI_PLAYER = 1
+    single_player = 0
+    multi_player = 1
 
 
 class Player(Enum):
-    COMPUTER = 1
-    HUMAN = -1
+    human = 1
+    computer = 2
 
     def __invert__(self):
-        return Player.COMPUTER if self != Player.COMPUTER else Player.HUMAN
+        return Player.computer if self != Player.computer else Player.human
 
 
 class Color(Enum):

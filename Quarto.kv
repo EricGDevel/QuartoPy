@@ -17,6 +17,7 @@
 
 <PiecesBar>:
     orientation: 'horizontal'
+    size_hint_y: 0.1
     canvas:
         Color:
             rgba: 0.8, 0.8, 0.8, 1
@@ -43,7 +44,7 @@
                 text: 'Main Menu'
                 on_release:
                     app.sm.current_screen.board.reset()
-                    app.sm.transition.direction = 'left'
+                    app.sm.transition.direction = 'right'
                     app.sm.current = 'menu'
 
 <MainMenuScreen>:
@@ -81,5 +82,3 @@
             on_release:
                 app.sm.transition.direction = 'right'
                 app.sm.current = 'menu'
-
-# <SettingsMenuScreen>:
