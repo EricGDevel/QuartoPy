@@ -5,7 +5,7 @@ Module main.py
 This module contains the main application and it's configuration
 """
 
-__version__ = '0.3'
+__version__ = '1.0'
 __author__ = 'Eric G.D'
 
 import os
@@ -13,7 +13,6 @@ import os
 import kivy
 from kivy.app import App
 from kivy.config import Config
-from kivy.logger import Logger
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
 from src.keyboard import Keyboard
@@ -47,7 +46,6 @@ class QuartoApp(App):
             # TODO: Remove redundant extra screen and have the screen get the game mode when the mode button is pressed
             QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.single_player))
             QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.multi_player))
-            Logger.debug("Setup: QuartoApp.sm generated.")
         return QuartoApp.sm
 
     @staticmethod
@@ -82,10 +80,10 @@ class QuartoApp(App):
         config_exists = os.path.isfile(QuartoApp.CONFIG_FILE)
         Config.read(QuartoApp.CONFIG_FILE)
         if not config_exists:
-            QuartoApp.setup_logging()
+            # QuartoApp.setup_logging()
             Config.set('kivy', 'exit_on_escape', 0)
             Config.set('graphics', 'fullscreen', 0)
-            Logger.debug("Setup: Config generated.")
+            # Logger.debug("Setup: Config updated.")
         Config.write()
         self.title = 'Quarto'
         self.icon = os.path.join('assets', 'icon.png')

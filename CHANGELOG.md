@@ -1,5 +1,28 @@
 # CHANGELOG
 
+# Beta [v1.0] - 2020-03-03
+
+
+### Added:
+
+- Added Piece.\__str\__() method
+- Documented methods
+
+
+### Changed:
+
+- Moved minimax function from minimax.py to board.py
+- Renamed minimax.py to ai.py
+
+
+## Fixed:
+
+- Fixed multiplayer player string names
+- Fixed AI bugs
+- Improved code readability
+
+
+
 ## Alpha [v0.3] - 2020-02-11
 
 

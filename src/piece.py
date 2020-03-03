@@ -6,7 +6,7 @@ Contains the declarations of the Piece and Cell classes.
 """
 
 __all__ = ['Piece', 'Cell']
-__version__ = '0.3'
+__version__ = '1.0'
 __author__ = 'Eric G.D'
 
 import os
@@ -50,6 +50,11 @@ class Piece:
 
     def __hash__(self) -> int:
         return hash(self.__id)
+
+    def __str__(self):
+        attribute_strings = (('Small', 'Large'), ('Square', 'Round'), ('Solid', 'Hollow'), ('Black', 'White'))
+        atts = [1 if att else 0 for att in self.__attributes]
+        return '{%s}' % ', '.join([attribute_strings[i][att] for i, att in enumerate(atts)])
 
     @property
     def attributes(self) -> Tuple[bool, ...]:

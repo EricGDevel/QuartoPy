@@ -1,5 +1,5 @@
 #: kivy 1.11.0
-#: import sysexit sys.exit
+#: import exit sys.exit
 
 <Board>:
     spacing: 2, 2
@@ -62,7 +62,7 @@
                 # app.sm.current = 'settings'
         Button:
             text: 'Quit'
-            on_release: sysexit(0)
+            on_release: exit(0)
 
 <PlayMenuScreen>:
     BoxLayout:

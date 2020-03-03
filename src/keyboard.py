@@ -14,14 +14,14 @@ from kivy.uix.widget import Widget
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '0.3'
+__version__ = '1.0'
 __author__ = 'Eric G.D'
 
 
 class Keyboard(Widget):
     """
-    Class Keyboard
-    --------------
+    Class Keyboard(Widget)
+    ----------------------
 
     A keyboard object that allows the user to control some of the game with the keyboard
     """
