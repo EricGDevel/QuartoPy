@@ -5,7 +5,7 @@ Module main.py
 This module contains the main application and it's configuration
 """
 
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Eric G.D'
 
 import os
@@ -31,6 +31,7 @@ class QuartoApp(App):
 
     sm = None
     keyboard = None
+    instructions = None
     CONFIG_FILE = 'kivy_config.ini'
 
     @staticmethod
@@ -43,10 +44,18 @@ class QuartoApp(App):
             QuartoApp.sm = ScreenManager(transition=SlideTransition())
             QuartoApp.sm.add_widget(MainMenuScreen(name='menu'))
             QuartoApp.sm.add_widget(PlayMenuScreen(name='play'))
+            QuartoApp.sm.add_widget(DifficultyMenuScreen(name='diff'))
             # TODO: Remove redundant extra screen and have the screen get the game mode when the mode button is pressed
             QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.single_player))
             QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.multi_player))
         return QuartoApp.sm
+
+    @staticmethod
+    def setup_instructions() -> Instructions:
+        if QuartoApp.instructions is None:
+            QuartoApp.instructions = Instructions()
+            QuartoApp.instructions.ids['img'].source = os.path.join('assets', 'instructions.jpg')
+        return QuartoApp.instructions
 
     @staticmethod
     def set_cwd() -> None:
@@ -94,6 +103,7 @@ class QuartoApp(App):
         :return:    The application's ScreenManager
         """
         self.set_config()
+        QuartoApp.setup_instructions()
         QuartoApp.keyboard = Keyboard(self)
         return QuartoApp.get_screen_manager()
 

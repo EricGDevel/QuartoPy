@@ -1,11 +1,12 @@
 #: kivy 1.11.0
 #: import exit sys.exit
+#: import colors src.constants.Colors
 
 <Board>:
     spacing: 2, 2
     canvas:
         Color:
-            rgba: 0.2, 0.2, 0.2, 1
+            rgba: colors.board
         Rectangle:
             pos: self.pos
             size: self.size
@@ -20,12 +21,12 @@
     size_hint_y: 0.1
     canvas:
         Color:
-            rgba: 0.8, 0.8, 0.8, 1
+            rgba: colors.pieces_bar
         Rectangle:
             pos: self.pos
             size: self.size
 
-<EndMessage>:
+<Message>:
     title: 'Game Over!'
     size_hint: 0.625, 0.625
     auto_dismiss: False
@@ -39,46 +40,85 @@
             Button:
                 text: 'Play Again'
                 on_release:
-                    app.sm.current_screen.board.reset()
+                    if app.sm.current in ('sp', 'mp'): app.sm.current_screen.board.reset()
             Button:
                 text: 'Main Menu'
                 on_release:
+                    if app.sm.current in ('sp', 'mp'): \
                     app.sm.current_screen.board.reset()
                     app.sm.transition.direction = 'right'
                     app.sm.current = 'menu'
 
+<Instructions>:
+    title: 'Instructions'
+    size_hint: 0.8, 0.8
+    auto_dismiss: True
+    AsyncImage:
+        allow_stretch: True
+        keep_ratio: True
+        id: img
+
+<MenuLayout>:
+    orientation: 'vertical'
+
+<BackButton>:
+    text: 'Back'
+    background_color: colors.cyan
+    on_release:
+    on_release:
+        app.sm.transition.direction = 'right'
+        app.sm.current = app.sm.previous()
+
+<DifficultyButton>:
+    on_release:
+        app.sm.transition.direction = 'left'
+        app.sm.current = 'sp'
+        app.sm.current_screen.board.set_difficulty(self.text.lower())
+        app.sm.current_screen.board.first_move()    # Start Game
+
 <MainMenuScreen>:
-    BoxLayout:
-        orientation: 'vertical'
+    MenuLayout:
         Button:
             text: 'Play'
+            background_color: colors.green
             on_release:
                 app.sm.transition.direction = 'left'
                 app.sm.current = 'play'
         Button:
-            text: 'Settings'
-            # on_release:
-                # app.sm.transition.direction = 'right'
-                # app.sm.current = 'settings'
+            text: 'Instructions'
+            background_color: colors.blue
+            on_release:
+                app.instructions.open()
         Button:
             text: 'Quit'
+            background_color: colors.red
             on_release: exit(0)
 
 <PlayMenuScreen>:
-    BoxLayout:
-        orientation: 'vertical'
+    MenuLayout:
         Button:
             text: 'Single-player'
             on_release:
                 app.sm.transition.direction = 'left'
-                app.sm.current = 'sp'
+                app.sm.current = 'diff'
         Button:
             text: 'Multi-player'
             on_release:
                 app.sm.transition.direction = 'left'
                 app.sm.current = 'mp'
-        Button:
-            text: 'Back'
-            on_release:
-                app.sm.transition.direction = 'right'
-                app.sm.current = 'menu'
+        BackButton:
+
+
+<DifficultyMenuScreen>:
+    MenuLayout:
+        DifficultyButton:
+            text: 'Baby'
+        DifficultyButton:
+            text: 'Easy'
+        DifficultyButton:
+            text: 'Medium'
+        DifficultyButton:
+            text: 'Hard'
+        DifficultyButton:
+            text: 'Very Hard'
+        BackButton:

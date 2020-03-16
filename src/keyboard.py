@@ -14,7 +14,7 @@ from kivy.uix.widget import Widget
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Eric G.D'
 
 
@@ -57,7 +57,7 @@ class Keyboard(Widget):
             index = (selected_index + relative_widget_index) % len(pieces_bar.widgets)
             pieces_bar.select(pieces_bar.widgets[index])
         elif key == 'enter' and pieces_bar.selected is not None:
-            pieces_bar.confirm(None)
+            pieces_bar.confirm()
 
     def _disable_keyboard(self) -> None:
         self._keyboard.unbind(on_key_down=self._on_key_down)

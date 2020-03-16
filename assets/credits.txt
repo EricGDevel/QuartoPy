@@ -7,3 +7,7 @@
 --- Window Icon ---
 - Made by: Eric G.D
 - License: CC 4.0
+
+--- Instructions ---
+- Made by: Gigamic
+- License: Unknown

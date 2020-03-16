@@ -1,5 +1,35 @@
 # CHANGELOG
 
+# Beta [v1.1] - 2020-03-??
+
+
+### Added:
+
+- Overhauled UI:
+    - Added game instructions
+    - Added colors!
+    - Added instructions screen
+    - Added difficulty selection screen
+    - Changed the image background instead of foreground when selecting or confirming pieces
+    - Updated piece images
+    - Updated Icon
+- Added more difficulty options 
+(Note that the game get stuck at very hard or higher)
+- Implemented symmetric gamestate detection (Starting options from 420 to 126)
+    
+
+### Changed:
+
+- Moved from minimax to negamax algorithm
+- Changed Option implementation so that the gamestate is stored as a numpy array
+
+### Fixed:
+
+- Fixed bug that crashed the program if the Main Menu/Reset
+buttons were pressed multiple times
+- Improved memory usage by using lower resolution image files
+
+
 # Beta [v1.0] - 2020-03-03
 
 
@@ -8,19 +38,16 @@
 - Added Piece.\__str\__() method
 - Documented methods
 
-
 ### Changed:
 
 - Moved minimax function from minimax.py to board.py
 - Renamed minimax.py to ai.py
-
 
 ## Fixed:
 
 - Fixed multiplayer player string names
 - Fixed AI bugs
 - Improved code readability
-
 
 
 ## Alpha [v0.3] - 2020-02-11
@@ -39,6 +66,10 @@
 - Improved is_full efficiency by checking the number of pieces left in Board.pieces_bar rather than checking if every spot in the board isn't empty
 - Moved pieces_set from Board to PiecesBar
 - Fixed EndMessage errors and finished implementing it
+
+### Removed:
+
+- Removed redundant type checks in functions
 
 
 # Pre-alpha [v0.2] - 2020-01-02

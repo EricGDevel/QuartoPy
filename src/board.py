@@ -6,21 +6,21 @@ This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
 
-__all__ = ['Board', 'PiecesBar']
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
 from math import inf
 from typing import List, Set, Union
 
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 
-from src.constants import *
 from src.ai import *
+from src.constants import *
 from src.piece import *
 
 
@@ -34,8 +34,8 @@ class Board(GridLayout):
     """
 
     LENGTH = 4
-    DIFFICULTY = {'baby': 0, 'easy': 2, 'medium': 4,
-                  'hard': 6, 'impossible': LENGTH ** 2}
+    DIFFICULTY = {'baby': 0, 'easy': 1, 'medium': 3, 'hard': 5,
+                  'very hard': 7, 'expert': 9, 'impossible': 11, 'max': LENGTH ** 2}
     popup = None
 
     def __init__(self, **kwargs) -> None:
@@ -43,11 +43,19 @@ class Board(GridLayout):
         self.rows = self.cols = Board.LENGTH
         self.first_player = self.current_player = kwargs.get('first_player', Player.computer)
         self.game_mode = kwargs.get('game_mode', GameMode.single_player)
-        self.depth = Board.DIFFICULTY[kwargs.get('difficulty', 'hard')]
+        difficulty = kwargs.get('difficulty')
+        self.depth = Board.DIFFICULTY.get(difficulty, 'medium')
         self.cell_list = [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
         self.pieces_bar = PiecesBar(self)
         self.initialise_buttons()
-        self.first_move()
+
+    def set_difficulty(self, key: str) -> None:
+        """
+        Changes the depth used by the negamax algorithm
+        :param key:     The key used to get the depth level
+        :return:        None
+        """
+        self.depth = Board.DIFFICULTY.get(key, self.depth)
 
     def initialise_buttons(self, reset: bool = False) -> None:
         """
@@ -84,7 +92,7 @@ class Board(GridLayout):
         Finds the best move for the computer and plays it
         :return:    None
         """
-        option = self.minimax()
+        option = self.negamax()
         i, j = option.index
         self.insert_confirmed(self.cell_list[i][j])
         self.pieces_bar.confirm(option.piece)
@@ -93,19 +101,20 @@ class Board(GridLayout):
     def get_turn_num(self) -> int:
         return (Piece.MAX_NUM + 1) - (len(self.pieces_bar) - 1)
 
-    def minimax(self):
+    def negamax(self):
         """
         Calculates the next move by evaluating the possible moves and playing as both sides
         :return: The best move for the board
+        .. seealso::   https://en.wikipedia.org/wiki/Negamax
         """
         board = self.convert()
-        max_player = self.current_player == Player.computer
+        sign = 1 if self.current_player == Player.computer else -1
         depth = Board.DIFFICULTY['baby'] if self.get_turn_num() < 5 else self.depth
         piece = self.pieces_bar.confirmed.piece
         pieces_set = deepcopy(self.pieces_bar.pieces_set)
         if depth <= 0:
-            return pick_best(board, piece, pieces_set, max_player)
-        return make_move(board, max_player, piece, pieces_set, -inf, inf, depth, depth)
+            return pick_best(board, piece, pieces_set)
+        return make_move(board, piece, pieces_set, sign, -inf, inf, depth, True)
 
     def on_click(self, touch) -> None:
         """
@@ -130,15 +139,19 @@ class Board(GridLayout):
         cell.piece = piece
         cell.unbind(on_release=self.on_click)
         converted = self.convert()
-        is_full = self.is_full()
         winning_move = has_won(converted)
-        game_over = is_full or winning_move
+        game_over = self.is_full() or winning_move
         if game_over:
             message = '{} wins!'.format(self.get_current_player_str()) if winning_move else "It's a tie!"
             self.end_message(message)
         return game_over
 
     def get_current_player_str(self) -> str:
+        """
+        If SinglePlayer: Returns the name of the enum value
+        If MultiPlayer: Returns the player's number
+        :return:    A string representation of the current player
+        """
         if self.game_mode == GameMode.single_player:
             return self.current_player.name.title()
         player_num = 1 if self.current_player == self.first_player else 2
@@ -163,8 +176,8 @@ class Board(GridLayout):
         """
         self.disabled = True
         if self.popup is None:
-            self.popup = EndMessage()
-        self.popup.ids.message.text = message
+            self.popup = Message()
+        self.popup.ids['message'].text = message
         self.popup.open()
 
     def reset(self) -> None:
@@ -176,16 +189,9 @@ class Board(GridLayout):
             self.popup.dismiss()
         self.disabled = False
         self.initialise_buttons(reset=True)
-        self.first_player = self.current_player = (~self.first_player)
+        self.first_player = self.current_player = next_player(self.first_player)
         self.pieces_bar.reset()
         self.first_move()
-
-    def change_player(self) -> None:
-        """
-        Switches the current player
-        :return:        None
-        """
-        self.current_player = (~self.current_player)  # Method defined in Player.__invert__()
 
     def is_full(self) -> bool:
         """
@@ -214,7 +220,7 @@ class PiecesBar(BoxLayout):
         Generates a set of all playable pieces
         :return:    The generated set
         """
-        return {Piece(num) for num in range(Board.LENGTH ** 2)}
+        return {Piece(num) for num in range(Piece.MAX_NUM + 1)}
 
     def __init__(self, board: Board, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -229,15 +235,16 @@ class PiecesBar(BoxLayout):
         self.confirm_button = Button(text='Confirm', size_hint_x=None)
         self.confirm_button.bind(on_release=self.confirm)
         self.add_widget(self.confirm_button)
+        Window.bind(on_resize=lambda *args: self.reselect())
 
-    def add_pieces(self):
+    def add_pieces(self) -> None:
         for piece in self.pieces_set:
             widget = Cell(piece)
             widget.bind(on_release=self.select)
-            self.widgets.append(widget)
             self.add_widget(widget)
+            self.widgets.append(widget)
 
-    def confirm(self, touch: Union[Piece, Cell]) -> None:
+    def confirm(self, touch: Union[Piece, Cell] = None) -> None:
         """
         Confirm's the player's selected piece
         :param touch:   The confirm button
@@ -257,13 +264,14 @@ class PiecesBar(BoxLayout):
                 confirmed = True
         if confirmed:
             self.pieces_set.remove(self.confirmed.piece)
-            self.confirmed.color = Color.CONFIRMED_TINT.value
-            self.board.change_player()
+            self.confirmed.set_background_color(Colors.confirmed)
+            self.board.current_player = next_player(self.board.current_player)
             if self.board.game_mode == GameMode.single_player and self.board.current_player == Player.computer:
                 self.board.computer_move()
 
-    def remove_confirmed(self):
+    def remove_confirmed(self) -> None:
         assert self.confirmed is not None
+        self.confirmed.canvas.before.clear()
         self.widgets.remove(self.confirmed)
         self.remove_widget(self.confirmed)
         self.confirmed = None
@@ -276,11 +284,11 @@ class PiecesBar(BoxLayout):
         """
         if self.confirmed is None:
             if self.selected is not None:
-                self.selected.color = Color.WHITE.value
+                self.selected.canvas.before.clear()
             self.selected = touch
-            touch.color = Color.SELECTED_TINT.value
+            touch.set_background_color(Colors.selected)
 
-    def clear_all(self):
+    def clear_all(self) -> None:
         while len(self.widgets) > 0:
             self.remove_widget(self.widgets[0])
             del self.widgets[0]
@@ -295,9 +303,15 @@ class PiecesBar(BoxLayout):
         self.add_widget(self.confirm_button)
         self.disabled = False
 
-    def __len__(self):
+    def reselect(self) -> None:
+        if self.selected is not None:
+            self.selected.set_background_color(Colors.selected)
+        elif self.confirmed is not None:
+            self.confirmed.set_background_color(Colors.confirmed)
+
+    def __len__(self) -> int:
         return len(self.widgets)
 
 
-class EndMessage(Popup):
+class Message(Popup):
     pass

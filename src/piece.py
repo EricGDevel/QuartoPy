@@ -6,12 +6,15 @@ Contains the declarations of the Piece and Cell classes.
 """
 
 __all__ = ['Piece', 'Cell']
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Eric G.D'
 
 import os
+from functools import partial
 from typing import Any, Tuple, Union
 
+from kivy.clock import Clock
+from kivy.graphics import Color, Rectangle
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import AsyncImage
 
@@ -51,7 +54,7 @@ class Piece:
     def __hash__(self) -> int:
         return hash(self.__id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         attribute_strings = (('Small', 'Large'), ('Square', 'Round'), ('Solid', 'Hollow'), ('Black', 'White'))
         atts = [1 if att else 0 for att in self.__attributes]
         return '{%s}' % ', '.join([attribute_strings[i][att] for i, att in enumerate(atts)])
@@ -124,3 +127,12 @@ class Cell(ButtonBehavior, AsyncImage):
             self.source = self.__piece.image
         else:
             raise TypeError(f'{type(p)} is not a valid type for :p:!')
+
+    def set_background_color(self, color: Tuple[int, int, int, int]) -> None:
+        self.canvas.before.clear()
+        Clock.schedule_once(partial(self.__set_bg_color, color))
+
+    def __set_bg_color(self, color: Tuple[int, int, int, int], *largs) -> None:
+        with self.canvas.before:
+            Color(rgba=color)
+            Rectangle(pos=self.pos, size=self.size)
