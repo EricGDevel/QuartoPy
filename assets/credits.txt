@@ -10,4 +10,8 @@
 
 --- Instructions ---
 - Made by: Gigamic
-- License: Unknown
+- License: CC All Rights Reserved
+
+------- Game -------
+- Made by: Gigamic
+- License: CC All Rights Reserved

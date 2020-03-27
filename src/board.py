@@ -6,12 +6,12 @@ This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
 
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
 from math import inf
-from typing import List, Set, Union
+from typing import Dict, List, Set, Union
 
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
@@ -21,7 +21,12 @@ from kivy.uix.popup import Popup
 
 from src.ai import *
 from src.constants import *
+from src.option import GameState
 from src.piece import *
+
+
+class Message(Popup):
+    pass
 
 
 class Board(GridLayout):
@@ -29,24 +34,26 @@ class Board(GridLayout):
     Class Board(GridLayout):
     ------------------------
 
-    Represents the main game board where pieces are inserted.
-    In addition, it contains most of the main program's code
+    The main game board where pieces are inserted.
+    This class contains most of the main program's code.
     """
 
-    LENGTH = 4
-    DIFFICULTY = {'baby': 0, 'easy': 1, 'medium': 3, 'hard': 5,
-                  'very hard': 7, 'expert': 9, 'impossible': 11, 'max': LENGTH ** 2}
-    popup = None
+    LENGTH: int = 4
+    DIFFICULTY: Dict[str, int] = {'baby': 0, 'easy': 1, 'medium': 3, 'hard': 5,
+                                  'very hard': 7, 'expert': 9, 'impossible': 11,
+                                  'max': LENGTH ** 2}  # Bottom rows for debugging
+    end_message: Message = None
 
     def __init__(self, **kwargs) -> None:
         super().__init__()
         self.rows = self.cols = Board.LENGTH
-        self.first_player = self.current_player = kwargs.get('first_player', Player.computer)
-        self.game_mode = kwargs.get('game_mode', GameMode.single_player)
+        self.first_player: Player = kwargs.get('first_player', Player.computer)
+        self.current_player: Player = self.first_player
+        self.game_mode: GameMode = kwargs.get('game_mode', GameMode.single_player)
         difficulty = kwargs.get('difficulty')
-        self.depth = Board.DIFFICULTY.get(difficulty, 'medium')
-        self.cell_list = [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
-        self.pieces_bar = PiecesBar(self)
+        self.depth: int = Board.DIFFICULTY.get(difficulty, Board.DIFFICULTY['medium'])
+        self.cell_list: List[List[Cell]] = [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
+        self.pieces_bar: PiecesBar = PiecesBar(self)
         self.initialise_buttons()
 
     def set_difficulty(self, key: str) -> None:
@@ -80,7 +87,7 @@ class Board(GridLayout):
         SINGLE_PLAYER:
         If Computer is the first player: Gets piece from player and runs the computer's move
         If Human is the first player: Ask the computer to pick a piece for the player to play.
-        MULTI_PLAYER: Gets a piece from the first player and the second player's move
+        MULTI_PLAYER: Waits for the first player to take their turn
         :return:    None
         """
         if self.game_mode == GameMode.single_player and self.first_player == Player.computer:
@@ -119,8 +126,8 @@ class Board(GridLayout):
     def on_click(self, touch) -> None:
         """
         The function that runs when a cell in the board is clicked
-        If no piece is selected: Do nothing
-        Else: Insert's the selected piece into the cell and runs the computer's turn
+        If a piece hasn't been confirmed: Do nothing
+        Otherwise: Inserts the confirmed piece into the cell and runs the computer's turn
         :param touch:   The cell that was clicked
         :return:        None
         """
@@ -138,12 +145,11 @@ class Board(GridLayout):
         """
         cell.piece = piece
         cell.unbind(on_release=self.on_click)
-        converted = self.convert()
-        winning_move = has_won(converted)
+        winning_move = has_won(self.convert())
         game_over = self.is_full() or winning_move
         if game_over:
-            message = '{} wins!'.format(self.get_current_player_str()) if winning_move else "It's a tie!"
-            self.end_message(message)
+            message = f'{self.get_current_player_str()} wins!' if winning_move else "It's a tie!"
+            self.game_over(message)
         return game_over
 
     def get_current_player_str(self) -> str:
@@ -168,25 +174,25 @@ class Board(GridLayout):
         self.pieces_bar.remove_confirmed()
         return self.insert(cell, piece)
 
-    def end_message(self, message: str) -> None:
+    def game_over(self, message: str) -> None:
         """
         Generates the end of game popup and displays it
         :param message: The message to display in the popup
         :return:        None
         """
         self.disabled = True
-        if self.popup is None:
-            self.popup = Message()
-        self.popup.ids['message'].text = message
-        self.popup.open()
+        if self.end_message is None:
+            self.end_message = Message()
+        self.end_message.ids['message'].text = message
+        self.end_message.open()
 
     def reset(self) -> None:
         """
         Starts a new game
         :return:    None
         """
-        if self.popup is not None:
-            self.popup.dismiss()
+        assert self.end_message is not None
+        self.end_message.dismiss()
         self.disabled = False
         self.initialise_buttons(reset=True)
         self.first_player = self.current_player = next_player(self.first_player)
@@ -199,11 +205,11 @@ class Board(GridLayout):
         """
         return len(self.pieces_bar) == 0
 
-    def convert(self) -> List[List[Piece]]:
+    def convert(self) -> GameState:
         """
         :return:                A simplified version of board
         """
-        return [[cell.piece for cell in row] for row in self.cell_list]
+        return GameState([[cell.piece for cell in row] for row in self.cell_list])
 
 
 class PiecesBar(BoxLayout):
@@ -226,18 +232,22 @@ class PiecesBar(BoxLayout):
         super().__init__(**kwargs)
         if not isinstance(board, Board):
             raise ValueError(f':board: needs to be a Board object, not {type(board)}!')
-        self.board = board
-        self.selected = None
-        self.confirmed = None
-        self.pieces_set = PiecesBar.generate_pieces_set()
-        self.widgets = []
+        self.board: Board = board
+        self.selected: Union[None, Cell] = None
+        self.confirmed: Union[None, Cell] = None
+        self.pieces_set: Set[Piece] = PiecesBar.generate_pieces_set()
+        self.widgets: List[Union[Cell, Button]] = []
         self.add_pieces()
-        self.confirm_button = Button(text='Confirm', size_hint_x=None)
+        self.confirm_button: Button = Button(text='Confirm', size_hint_x=None)
         self.confirm_button.bind(on_release=self.confirm)
         self.add_widget(self.confirm_button)
         Window.bind(on_resize=lambda *args: self.reselect())
 
     def add_pieces(self) -> None:
+        """
+        Adds all the pieces in :self.pieces_set: to the layout
+        :return:    None
+        """
         for piece in self.pieces_set:
             widget = Cell(piece)
             widget.bind(on_release=self.select)
@@ -263,16 +273,20 @@ class PiecesBar(BoxLayout):
                 self.selected = None
                 confirmed = True
         if confirmed:
-            self.pieces_set.remove(self.confirmed.piece)
             self.confirmed.set_background_color(Colors.confirmed)
             self.board.current_player = next_player(self.board.current_player)
             if self.board.game_mode == GameMode.single_player and self.board.current_player == Player.computer:
                 self.board.computer_move()
 
     def remove_confirmed(self) -> None:
+        """
+        Remove the confirmed piece from :self.widgets: and :self.pieces_set:
+        :return:    None
+        """
         assert self.confirmed is not None
         self.confirmed.canvas.before.clear()
         self.widgets.remove(self.confirmed)
+        self.pieces_set.remove(self.confirmed.piece)
         self.remove_widget(self.confirmed)
         self.confirmed = None
 
@@ -311,7 +325,3 @@ class PiecesBar(BoxLayout):
 
     def __len__(self) -> int:
         return len(self.widgets)
-
-
-class Message(Popup):
-    pass

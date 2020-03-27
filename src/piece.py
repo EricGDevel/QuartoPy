@@ -6,11 +6,10 @@ Contains the declarations of the Piece and Cell classes.
 """
 
 __all__ = ['Piece', 'Cell']
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Eric G.D'
 
 import os
-from functools import partial
 from typing import Any, Tuple, Union
 
 from kivy.clock import Clock
@@ -24,15 +23,15 @@ class Piece:
     Class Piece
     -----------
 
-    Contains the data of every piece, including it's id number, attributes tuple and image representation
+    Contains the data of a piece, including it's id number, attributes tuple and image path
     """
-    NUM_OF_BITS = 4
-    MAX_NUM = (2 ** NUM_OF_BITS) - 1
+    NUM_OF_ATTRIBUTES: int = 4
+    MAX_NUM: int = (2 ** NUM_OF_ATTRIBUTES) - 1
 
     def __init__(self, num: int) -> None:
-        self.__id = num
-        self.__attributes = Piece.get_attributes(num)
-        self.__image = os.path.join('assets', f'piece_{str(num).zfill(2)}.png')
+        self.__id: int = num
+        self.__attributes: Tuple[bool, ...] = Piece.get_attributes(num)
+        self.__image: str = os.path.join('assets', f'piece_{str(num).zfill(2)}.png')
 
     @staticmethod
     def get_attributes(num: int) -> Tuple[bool, ...]:
@@ -43,21 +42,27 @@ class Piece:
         if not isinstance(num, int):
             raise TypeError(f':num: needs to be an int, not {type(num)}!')
         if not 0 <= num <= Piece.MAX_NUM:
-            raise ValueError(f':num: needs to be between 0 and {Piece.MAX_NUM}')
-        binary_str = format(num, 'b').zfill(Piece.NUM_OF_BITS)
-        attributes = [bit == '1' for bit in binary_str]
-        return tuple(attributes)
+            raise ValueError(f':num: needs to be between 0 and {Piece.MAX_NUM}.')
+        binary_str = format(num, 'b').zfill(Piece.NUM_OF_ATTRIBUTES)
+        attributes = tuple(bit == '1' for bit in binary_str)
+        return attributes
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Piece) and other.__id == self.__id
 
     def __hash__(self) -> int:
-        return hash(self.__id)
+        return self.__id
+
+    def __repr__(self) -> str:
+        return f'Piece({self.__id})'
 
     def __str__(self) -> str:
+        """
+        :return: A string containing the piece's attributes
+        """
         attribute_strings = (('Small', 'Large'), ('Square', 'Round'), ('Solid', 'Hollow'), ('Black', 'White'))
-        atts = [1 if att else 0 for att in self.__attributes]
-        return '{%s}' % ', '.join([attribute_strings[i][att] for i, att in enumerate(atts)])
+        attributes = [1 if att else 0 for att in self.__attributes]
+        return '{' + ', '.join(attribute_strings[i][att] for i, att in enumerate(attributes)) + '}'
 
     @property
     def attributes(self) -> Tuple[bool, ...]:
@@ -94,7 +99,7 @@ class Cell(ButtonBehavior, AsyncImage):
     --------------------------------------
 
     Represents a cell in the game board and a button in PiecesBar
-    This class is essentially a graphic wrapper for Piece
+    This class is a graphic wrapper for Piece
     """
     BLANK_IMAGE = os.path.join('assets', 'blank.png')
 
@@ -105,7 +110,7 @@ class Cell(ButtonBehavior, AsyncImage):
             piece = Piece(piece)
         if not isinstance(piece, Piece) and piece is not None:
             raise TypeError(f'{type(piece)} is not a valid type for :piece:!')
-        self.__piece = piece
+        self.__piece: Union[None, Piece] = piece
         self.source = piece.image if piece is not None else Cell.BLANK_IMAGE
 
     @property
@@ -129,10 +134,21 @@ class Cell(ButtonBehavior, AsyncImage):
             raise TypeError(f'{type(p)} is not a valid type for :p:!')
 
     def set_background_color(self, color: Tuple[int, int, int, int]) -> None:
+        """
+        Change the background color of the cell
+        This function is a wrapper for __set_bg_color, which is called by kivy.Clock
+        :param color:   A tuple containing the rgba value of the color
+        :return:        None
+        """
         self.canvas.before.clear()
-        Clock.schedule_once(partial(self.__set_bg_color, color))
+        Clock.schedule_once(lambda *args: self.__set_bg_color(color))
 
-    def __set_bg_color(self, color: Tuple[int, int, int, int], *largs) -> None:
+    def __set_bg_color(self, color: Tuple[int, int, int, int]) -> None:
+        """
+        Places a colored rectangle behind the canvas of the cell
+        :param color:   The color of the rectangle to place
+        :return:        None
+        """
         with self.canvas.before:
             Color(rgba=color)
             Rectangle(pos=self.pos, size=self.size)

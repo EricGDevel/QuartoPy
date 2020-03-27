@@ -2,7 +2,8 @@
 Module screens.py
 =================
 
-This module contains all the Screen objects that are used by the ScreenManager in main.py
+This module contains all the Screen objects and the widgets that they use,
+that are in turn used by the App's ScreenManager
 """
 
 from kivy.uix.boxlayout import BoxLayout
@@ -13,7 +14,7 @@ from kivy.uix.screenmanager import Screen
 from src.board import Board
 from src.constants import *
 
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Eric G.D'
 
 
@@ -22,7 +23,7 @@ class GameScreen(Screen):
     Class GameScreen(Screen)
     ------------------------
 
-    Contains the main game's layout and connects all of the different widgets to each other.
+    Contains the main game's layout, including the board and piece selection bar
     """
 
     def __init__(self, **kwargs) -> None:
@@ -42,7 +43,7 @@ class MainMenuScreen(Screen):
     Class MainMenuScreen(Screen)
     ----------------------------
 
-    The main menu screen that allows the user tp navigate to the Play and Settings screens
+    The main menu screen that allows the user to navigate to the Play and Settings screens, and exit the program
     """
     pass
 
@@ -52,7 +53,7 @@ class PlayMenuScreen(Screen):
     Class PlayMenuScreen(Screen)
     ----------------------------
 
-    This menu allows the player to select what gamemode they would like to play
+    Used to let the player to select what GameMode they would like to play
     """
     pass
 
@@ -82,7 +83,7 @@ class Instructions(Popup):
     Class Instructions(Popup)
     -------------------------
 
-    A popup that contains an image that explains the rules of the game
+    A popup that contains the rules of the game
     """
     pass
 
@@ -92,7 +93,7 @@ class BackButton(Button):
     Class BackButton(Button)
     ------------------------
 
-    This button moves back one screen
+    Moves back one screen when pressed
     """
     pass
 
@@ -102,6 +103,6 @@ class DifficultyButton(Button):
     Class DifficultyButton(Button)
     ------------------------------
 
-    This Button selects the difficulty for the single player game
+    Selects the game's difficulty when pressed
     """
     pass

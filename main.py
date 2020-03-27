@@ -2,10 +2,10 @@
 Module main.py
 ==============
 
-This module contains the main application and it's configuration
+This module contains the source code of the main kivy app and it's runtime code
 """
 
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Eric G.D'
 
 import os
@@ -27,31 +27,35 @@ class QuartoApp(App):
     ---------------------
 
     This is an extension of the app class, used to start the Kivy program
+    Contains the runtime code of the application
     """
 
-    sm = None
-    keyboard = None
-    instructions = None
-    CONFIG_FILE = 'kivy_config.ini'
+    sm: ScreenManager = None
+    keyboard: Keyboard = None
+    instructions: Instructions = None
+    CONFIG_FILE: str = 'kivy_config.ini'
 
     @staticmethod
     def get_screen_manager() -> ScreenManager:
         """
         Initialises the program's ScreenManger and returns it
-        :return:    QuartoApp.sm
+        :return:    A reference to QuartoApp.sm
         """
         if QuartoApp.sm is None:
             QuartoApp.sm = ScreenManager(transition=SlideTransition())
             QuartoApp.sm.add_widget(MainMenuScreen(name='menu'))
             QuartoApp.sm.add_widget(PlayMenuScreen(name='play'))
             QuartoApp.sm.add_widget(DifficultyMenuScreen(name='diff'))
-            # TODO: Remove redundant extra screen and have the screen get the game mode when the mode button is pressed
             QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.single_player))
             QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.multi_player))
         return QuartoApp.sm
 
     @staticmethod
     def setup_instructions() -> Instructions:
+        """
+        Initialises the programs Instructions popup and returns it
+        :return:    A reference to QuartoApp.instructions
+        """
         if QuartoApp.instructions is None:
             QuartoApp.instructions = Instructions()
             QuartoApp.instructions.ids['img'].source = os.path.join('assets', 'instructions.jpg')
@@ -60,8 +64,7 @@ class QuartoApp(App):
     @staticmethod
     def set_cwd() -> None:
         """
-        Sets the current working directory to this file's directory
-        In addition, it set's this window's icon
+        Sets the current working directory to this file's (main.py) base folder
         :return:    None
         """
         path = os.path.dirname(os.path.realpath(__file__))
@@ -73,7 +76,6 @@ class QuartoApp(App):
         Sets up the program's logger
         :return:    None
         """
-        # TODO: Fix logging bugs (Multiple log files per run, not saving to logs/ folder)
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
         Config.set('kivy', 'log_dir', os.path.join(os.getcwd(), 'logs'))
         Config.set('kivy', 'log_maxfiles', 10)
@@ -99,8 +101,9 @@ class QuartoApp(App):
 
     def build(self) -> ScreenManager:
         """
-        Starts the program
-        :return:    The application's ScreenManager
+        Builds an instance of QuaroApp and starts the main program
+        Called by QuartoApp.run()
+        :return:    The application's ScreenManager, used as the base widget for the window
         """
         self.set_config()
         QuartoApp.setup_instructions()

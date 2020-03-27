@@ -6,34 +6,39 @@ Contains the implementation of the keyboard object that gets the user's input
 """
 
 import sys
+from typing import Callable
 
-from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.widget import Widget
 
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.1'
+__version__ = '1.2'
 __author__ = 'Eric G.D'
 
 
-class Keyboard(Widget):
+class Keyboard(Widget):  # Is a subclass of widget to provide window resizing support
     """
     Class Keyboard(Widget)
     ----------------------
 
-    A keyboard object that allows the user to control some of the game with the keyboard
+    A wrapper for the kivy keyboard object that provides keyboard controls
     """
 
-    def __init__(self, app: App, **kwargs) -> None:
+    def __init__(self, app: 'QuartoApp', **kwargs) -> None:
         super().__init__(**kwargs)
-        self._keyboard = Window.request_keyboard(self._disable_keyboard, self)
-        self._keyboard.bind(on_key_down=self._on_key_down)
-        self._app = app
+        self._keyboard: 'Kivy Keyboard' = Window.request_keyboard(self._disable_keyboard, self)
+        self._app: 'QuartoApp' = app
+        self.callback: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
+        self._keyboard.bind(on_key_down=self.callback)
 
-    def _on_key_down(self, keyboard, keycode, text, modifiers) -> None:
-        key = keycode[1]
+    def _on_key_down(self, key: str) -> None:
+        """
+        This function is called whenever a key is pressed
+        :param key:     The key that was pressed
+        :return:        None
+        """
         if key == 'escape':
             sys.exit(0)
         pieces_bar = self._app.sm.current_screen.pieces_bar \
@@ -45,7 +50,7 @@ class Keyboard(Widget):
     def __keyboard_select(pieces_bar: PiecesBar, key: str) -> None:
         """
         Selects or confirms the selected piece based on the key that the player pressed
-        :param pieces_bar:  The PiecesBar object of the current game
+        :param pieces_bar:  The Piece selection bar of the current screen
         :param key:         The key that was pressed
         :return:            None
         """
@@ -60,5 +65,5 @@ class Keyboard(Widget):
             pieces_bar.confirm()
 
     def _disable_keyboard(self) -> None:
-        self._keyboard.unbind(on_key_down=self._on_key_down)
+        self._keyboard.unbind(on_key_down=self.callback)
         self._keyboard = None

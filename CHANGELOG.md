@@ -1,6 +1,19 @@
 # CHANGELOG
 
-# Beta [v1.1] - 2020-03-??
+## Beta  [v1.2] - 2020-03-??
+
+### Added:
+
+- Created GameState Class, a wrapper for the simplified board with Zobrist hashing support
+- Implemented a transposition table to save previously calculated move scores
+
+### Changed:
+
+- Improved documentation
+- Added \__repr\__ functions for debugging
+
+
+## Beta [v1.1] - 2020-03-16
 
 
 ### Added:
@@ -30,7 +43,7 @@ buttons were pressed multiple times
 - Improved memory usage by using lower resolution image files
 
 
-# Beta [v1.0] - 2020-03-03
+## Beta [v1.0] - 2020-03-03
 
 
 ### Added:
@@ -72,7 +85,7 @@ buttons were pressed multiple times
 - Removed redundant type checks in functions
 
 
-# Pre-alpha [v0.2] - 2020-01-02
+## Pre-alpha [v0.2] - 2020-01-02
 
 
 ### Added:
@@ -96,7 +109,7 @@ buttons were pressed multiple times
 - Fixed multiple typing module errors
 
 
-# Pre-alpha [v0.1] - 2019-12-13
+## Pre-alpha [v0.1] - 2019-12-13
 
 
 ### Added:
