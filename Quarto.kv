@@ -54,10 +54,17 @@
     title: 'Instructions'
     size_hint: 0.8, 0.8
     auto_dismiss: True
-    AsyncImage:
-        allow_stretch: True
-        keep_ratio: True
-        id: img
+    BoxLayout:
+        orientation: 'vertical'
+        AsyncImage:
+            allow_stretch: True
+            keep_ratio: True
+            id: img
+        Button:
+            text: 'Close'
+            size_hint_y: 0.5
+            on_release:
+                root.dismiss()
 
 <MenuLayout>:
     orientation: 'vertical'
