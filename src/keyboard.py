@@ -5,6 +5,7 @@ Module keyboard.py
 Contains the implementation of the keyboard object that gets the user's input
 """
 
+import sys
 from typing import Callable
 
 from kivy.core.window import Window
@@ -29,8 +30,10 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         super().__init__(**kwargs)
         self._keyboard: 'Kivy Keyboard' = Window.request_keyboard(self._disable_keyboard, self)
         self._app: 'QuartoApp' = app
-        self.callback: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
-        self._keyboard.bind(on_key_down=self.callback)
+        self.key_down: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
+        self.key_up: Callable[..., None] = lambda *args: self._on_key_up(args[1][1])
+        self._keyboard.bind(on_key_down=self.key_down)
+        self._keyboard.bind(on_key_up=self.key_up)
 
     def _on_key_down(self, key: str) -> None:
         """
@@ -38,16 +41,23 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :param key:     The key that was pressed
         :return:        None
         """
-        if key == 'escape':
-            self.toggle_pause_menu()
         pieces_bar = self._app.sm.current_screen.pieces_bar \
             if isinstance(self._app.sm.current_screen, GameScreen) else None
         if isinstance(pieces_bar, PiecesBar) and pieces_bar.confirmed is None:
             Keyboard.__keyboard_select(pieces_bar, key)
 
+    def _on_key_up(self, key: str) -> None:
+        """
+        This function is called whenever a key is released
+        :param key:     The key that was pressed
+        :return:        None
+        """
+        if key == 'escape':
+            self.toggle_pause_menu()
+
     def toggle_pause_menu(self) -> None:
         if self._app.sm.current not in ('sp', 'mp'):
-            return
+            sys.exit()
         if not self._app.paused:
             self._app.pause_menu.open()
         else:
@@ -73,5 +83,6 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
             pieces_bar.confirm()
 
     def _disable_keyboard(self) -> None:
-        self._keyboard.unbind(on_key_down=self.callback)
+        self._keyboard.unbind(on_key_down=self.key_down)
+        self._keyboard.unbind(on_key_up=self.key_up)
         self._keyboard = None
