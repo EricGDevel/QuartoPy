@@ -5,7 +5,6 @@ Module keyboard.py
 Contains the implementation of the keyboard object that gets the user's input
 """
 
-import sys
 from typing import Callable
 
 from kivy.core.window import Window
@@ -14,7 +13,7 @@ from kivy.uix.widget import Widget
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.2'
+__version__ = '1.2.1'
 __author__ = 'Eric G.D'
 
 
@@ -40,11 +39,20 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :return:        None
         """
         if key == 'escape':
-            sys.exit(0)
+            self.toggle_pause_menu()
         pieces_bar = self._app.sm.current_screen.pieces_bar \
             if isinstance(self._app.sm.current_screen, GameScreen) else None
         if isinstance(pieces_bar, PiecesBar) and pieces_bar.confirmed is None:
             Keyboard.__keyboard_select(pieces_bar, key)
+
+    def toggle_pause_menu(self) -> None:
+        if self._app.sm.current not in ('sp', 'mp'):
+            return
+        if not self._app.paused:
+            self._app.pause_menu.open()
+        else:
+            self._app.pause_menu.dismiss()
+        self._app.paused = not self._app.paused
 
     @staticmethod
     def __keyboard_select(pieces_bar: PiecesBar, key: str) -> None:

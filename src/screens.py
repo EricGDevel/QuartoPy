@@ -14,7 +14,7 @@ from kivy.uix.screenmanager import Screen
 from src.board import Board
 from src.constants import *
 
-__version__ = '1.2'
+__version__ = '1.2.1'
 __author__ = 'Eric G.D'
 
 
@@ -84,6 +84,19 @@ class Instructions(Popup):
     -------------------------
 
     A popup that contains the rules of the game
+    """
+
+    def __init__(self, src: str, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.ids['img'].source = src
+
+
+class PauseMenu(Popup):
+    """
+    Class PauseMenu(Popup)
+    ----------------------
+
+    A popup that allows the player to go to the main menu or restart
     """
     pass
 

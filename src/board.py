@@ -6,7 +6,7 @@ This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
 
-__version__ = '1.2'
+__version__ = '1.2.1'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
@@ -132,10 +132,7 @@ class Board(GridLayout):
         :return:        None
         """
         if self.pieces_bar.confirmed is not None:
-            game_over = self.insert_confirmed(touch)
-            if game_over:
-                self.disabled = True
-                self.pieces_bar.disabled = True
+            self.insert_confirmed(touch)
 
     def insert(self, cell: Cell, piece: Piece) -> bool:
         """
@@ -180,7 +177,6 @@ class Board(GridLayout):
         :param message: The message to display in the popup
         :return:        None
         """
-        self.disabled = True
         if self.end_message is None:
             self.end_message = Message()
         self.end_message.ids['message'].text = message
@@ -191,9 +187,8 @@ class Board(GridLayout):
         Starts a new game
         :return:    None
         """
-        assert self.end_message is not None
-        self.end_message.dismiss()
-        self.disabled = False
+        if self.end_message is not None:
+            self.end_message.dismiss()
         self.initialise_buttons(reset=True)
         self.first_player = self.current_player = next_player(self.first_player)
         self.pieces_bar.reset()
@@ -315,7 +310,6 @@ class PiecesBar(BoxLayout):
         self.pieces_set = PiecesBar.generate_pieces_set()
         self.add_pieces()
         self.add_widget(self.confirm_button)
-        self.disabled = False
 
     def reselect(self) -> None:
         if self.selected is not None:

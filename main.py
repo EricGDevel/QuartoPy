@@ -33,6 +33,8 @@ class QuartoApp(App):
     sm: ScreenManager = None
     keyboard: Keyboard = None
     instructions: Instructions = None
+    pause_menu: PauseMenu = None
+    paused: bool = False
     CONFIG_FILE: str = 'kivy_config.ini'
 
     @staticmethod
@@ -57,9 +59,19 @@ class QuartoApp(App):
         :return:    A reference to QuartoApp.instructions
         """
         if QuartoApp.instructions is None:
-            QuartoApp.instructions = Instructions()
-            QuartoApp.instructions.ids['img'].source = os.path.join('assets', 'instructions.jpg')
+            QuartoApp.instructions = Instructions(os.path.join('assets', 'instructions.jpg'))
         return QuartoApp.instructions
+
+    @staticmethod
+    def setup_pause_menu() -> PauseMenu:
+        """
+        Initialises the programs Pause Menu Popup and returns it
+        :return:    A reference to QuartoApp.pause_menu
+        """
+        if QuartoApp.pause_menu is None:
+            QuartoApp.pause_menu = PauseMenu()
+            QuartoApp.paused = False
+        return QuartoApp.pause_menu
 
     @staticmethod
     def set_cwd() -> None:
@@ -107,6 +119,7 @@ class QuartoApp(App):
         """
         self.set_config()
         QuartoApp.setup_instructions()
+        QuartoApp.setup_pause_menu()
         QuartoApp.keyboard = Keyboard(self)
         return QuartoApp.get_screen_manager()
 

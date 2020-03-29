@@ -1,14 +1,24 @@
 # CHANGELOG
 
-## Beta  [v1.2] - 2020-03-??
+## Beta [v1.2.1] - 2020-03-29
+
 
 ### Added:
+- Added a pause menu
 
+### Changed:
+- Added button that closes instructions popup
+- Added game title to main menu
+
+
+## Beta  [v1.2] - 2020-03-27
+
+
+### Added:
 - Created GameState Class, a wrapper for the simplified board with Zobrist hashing support
 - Implemented a transposition table to save previously calculated move scores
 
 ### Changed:
-
 - Improved documentation
 - Added \__repr\__ functions for debugging
 
@@ -17,7 +27,6 @@
 
 
 ### Added:
-
 - Overhauled UI:
     - Added game instructions
     - Added colors!
@@ -30,14 +39,11 @@
 (Note that the game get stuck at very hard or higher)
 - Implemented symmetric gamestate detection (Starting options from 420 to 126)
     
-
 ### Changed:
-
 - Moved from minimax to negamax algorithm
 - Changed Option implementation so that the gamestate is stored as a numpy array
 
 ### Fixed:
-
 - Fixed bug that crashed the program if the Main Menu/Reset
 buttons were pressed multiple times
 - Improved memory usage by using lower resolution image files
@@ -47,17 +53,14 @@ buttons were pressed multiple times
 
 
 ### Added:
-
 - Added Piece.\__str\__() method
 - Documented methods
 
 ### Changed:
-
 - Moved minimax function from minimax.py to board.py
 - Renamed minimax.py to ai.py
 
 ## Fixed:
-
 - Fixed multiplayer player string names
 - Fixed AI bugs
 - Improved code readability
@@ -81,7 +84,6 @@ buttons were pressed multiple times
 - Fixed EndMessage errors and finished implementing it
 
 ### Removed:
-
 - Removed redundant type checks in functions
 
 

@@ -63,8 +63,31 @@
         Button:
             text: 'Close'
             size_hint_y: 0.5
+            on_release: root.dismiss()
+
+<PauseMenu>:
+    title: 'Paused'
+    size_hint: 0.8, 0.8
+    auto_dismiss: False
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Restart'
             on_release:
                 root.dismiss()
+                if app.sm.current in ('sp', 'mp'): app.sm.current_screen.board.reset()
+        Button:
+            text: 'Main Menu'
+            on_release:
+                root.dismiss()
+                if app.sm.current in ('sp', 'mp'): \
+                app.sm.current_screen.board.reset()
+                app.sm.transition.direction = 'right'
+                app.sm.current = 'menu'
+        Button:
+            text: 'Close'
+            on_release: root.dismiss()
+
 
 <MenuLayout>:
     orientation: 'vertical'
