@@ -6,7 +6,7 @@ Contains the declarations of the Piece and Cell classes.
 """
 
 __all__ = ['Piece', 'Cell']
-__version__ = '1.2'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 import os
@@ -108,7 +108,7 @@ class Cell(ButtonBehavior, AsyncImage):
         AsyncImage.__init__(self)
         if isinstance(piece, int):
             piece = Piece(piece)
-        if not isinstance(piece, Piece) and piece is not None:
+        if not (piece is None or isinstance(piece, Piece)):
             raise TypeError(f'{type(piece)} is not a valid type for :piece:!')
         self.__piece: Union[None, Piece] = piece
         self.source = piece.image if piece is not None else Cell.BLANK_IMAGE
@@ -119,19 +119,12 @@ class Cell(ButtonBehavior, AsyncImage):
 
     @piece.setter
     def piece(self, p: Union[None, int, Piece]) -> None:
-        if p is None:
-            self.__piece = p
-            self.source = Cell.BLANK_IMAGE
-        elif isinstance(p, int):
-            if not 0 <= p <= Piece.MAX_NUM:
-                raise ValueError(f':p: needs to be between 0 and {Piece.MAX_NUM}')
+        if isinstance(p, int):
             self.__piece = Piece(p)
-            self.source = self.__piece.image
-        elif isinstance(p, Piece):
-            self.__piece = p
-            self.source = self.__piece.image
-        else:
+        if not (p is None or isinstance(p, Piece)):
             raise TypeError(f'{type(p)} is not a valid type for :p:!')
+        self.__piece: Piece = p
+        self.source = p.image if p is not None else Cell.BLANK_IMAGE
 
     def set_background_color(self, color: Tuple[int, int, int, int]) -> None:
         """

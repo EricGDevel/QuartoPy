@@ -51,14 +51,21 @@ class Board(GridLayout):
         self.current_player: Player = self.first_player
         self.game_mode: GameMode = kwargs.get('game_mode', GameMode.single_player)
         difficulty = kwargs.get('difficulty')
-        self.depth: int = Board.DIFFICULTY.get(difficulty, Board.DIFFICULTY['medium'])
-        self.cell_list: List[List[Cell]] = [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
+        self.depth: int = Board.DIFFICULTY.get(difficulty, 'medium')
+        self.turn_num: int = 1
+        self.cell_list: List[List[Cell]] = self.generate_cell_list()
         self.pieces_bar: PiecesBar = PiecesBar(self)
         self.initialise_buttons()
 
+    def generate_cell_list(self) -> List[List[Cell]]:
+        """
+        :return:    A 2D List containing the board's cells
+        """
+        return [[Cell() for _ in range(self.cols)] for _ in range(self.rows)]
+
     def set_difficulty(self, key: str) -> None:
         """
-        Changes the depth used by the negamax algorithm
+        Changes the depth limit used by the AI
         :param key:     The key used to get the depth level
         :return:        None
         """
@@ -85,9 +92,9 @@ class Board(GridLayout):
         """
         Runs the first move:
         SINGLE_PLAYER:
-        If Computer is the first player: Gets piece from player and runs the computer's move
         If Human is the first player: Ask the computer to pick a piece for the player to play.
-        MULTI_PLAYER: Waits for the first player to take their turn
+        If Computer is the first player: Does nothing and waits for player to select piece (Through PiecesBar.confirm)
+        MULTI_PLAYER: Does nothing and waits for the first player to take their turn (Through on_click)
         :return:    None
         """
         if self.game_mode == GameMode.single_player and self.first_player == Player.computer:
@@ -105,23 +112,25 @@ class Board(GridLayout):
         self.pieces_bar.confirm(option.piece)
         # Logger.info('Application: Computer placed {} at {}'.format(self.pieces_bar, option.index))
 
-    def get_turn_num(self) -> int:
-        return (Piece.MAX_NUM + 1) - (len(self.pieces_bar) - 1)
-
     def negamax(self):
         """
         Calculates the next move by evaluating the possible moves and playing as both sides
-        :return: The best move for the board
-        .. seealso::   https://en.wikipedia.org/wiki/Negamax
+
+        :return:        The best move for the board
+
+        .. seealso::    https://www.chessprogramming.org/Minimax\n
+                        https://en.wikipedia.org/wiki/Minimax\n
+                        https://www.chessprogramming.org/Negamax\n
+                        https://en.wikipedia.org/wiki/Negamax
         """
         board = self.convert()
-        sign = 1 if self.current_player == Player.computer else -1
-        depth = Board.DIFFICULTY['baby'] if self.get_turn_num() < 5 else self.depth
         piece = self.pieces_bar.confirmed.piece
-        pieces_set = deepcopy(self.pieces_bar.pieces_set)
+        pieces_set = self.pieces_bar.pieces_set
+        depth = Board.DIFFICULTY['baby'] if self.turn_num < 5 else self.depth
         if depth <= 0:
-            return pick_best(board, piece, pieces_set)
-        return make_move(board, piece, pieces_set, sign, -inf, inf, depth, True)
+            return pick_best(board, piece, deepcopy(pieces_set))
+        sign = 1 if self.current_player == Player.computer else -1
+        return iterative_deepening(board, piece, pieces_set, sign, -inf, inf, depth)
 
     def on_click(self, touch) -> None:
         """
@@ -142,6 +151,7 @@ class Board(GridLayout):
         """
         cell.piece = piece
         cell.unbind(on_release=self.on_click)
+        self.turn_num += 1
         winning_move = has_won(self.convert())
         game_over = self.is_full() or winning_move
         if game_over:
@@ -166,7 +176,8 @@ class Board(GridLayout):
         :param cell:    The cell to insert into
         :return:        If the game has ended or not
         """
-        assert self.pieces_bar.confirmed is not None
+        if self.pieces_bar.confirmed is None:
+            raise TypeError('Please confirm a piece before inserting!')
         piece = self.pieces_bar.confirmed.piece
         self.pieces_bar.remove_confirmed()
         return self.insert(cell, piece)
@@ -191,6 +202,7 @@ class Board(GridLayout):
             self.end_message.dismiss()
         self.initialise_buttons(reset=True)
         self.first_player = self.current_player = next_player(self.first_player)
+        self.turn_num = 1
         self.pieces_bar.reset()
         self.first_move()
 
@@ -215,14 +227,6 @@ class PiecesBar(BoxLayout):
     The bar containing all playable pieces. Is displayed underneath the board
     """
 
-    @staticmethod
-    def generate_pieces_set() -> Set[Piece]:
-        """
-        Generates a set of all playable pieces
-        :return:    The generated set
-        """
-        return {Piece(num) for num in range(Piece.MAX_NUM + 1)}
-
     def __init__(self, board: Board, **kwargs) -> None:
         super().__init__(**kwargs)
         if not isinstance(board, Board):
@@ -234,9 +238,20 @@ class PiecesBar(BoxLayout):
         self.widgets: List[Union[Cell, Button]] = []
         self.add_pieces()
         self.confirm_button: Button = Button(text='Confirm', size_hint_x=None)
-        self.confirm_button.bind(on_release=self.confirm)
+        self.confirm_button.bind(on_release=lambda *args: self.confirm())
         self.add_widget(self.confirm_button)
         Window.bind(on_resize=lambda *args: self.reselect())
+
+    def __len__(self) -> int:
+        return len(self.widgets)
+
+    @staticmethod
+    def generate_pieces_set() -> Set[Piece]:
+        """
+        Generates a set of all playable pieces
+        :return:    The generated set
+        """
+        return {Piece(num) for num in range(Piece.MAX_NUM + 1)}
 
     def add_pieces(self) -> None:
         """
@@ -249,36 +264,43 @@ class PiecesBar(BoxLayout):
             self.add_widget(widget)
             self.widgets.append(widget)
 
-    def confirm(self, touch: Union[Piece, Cell] = None) -> None:
+    def confirm(self, touch: Piece = None) -> None:
         """
         Confirm's the player's selected piece
         :param touch:   The confirm button
         :return:        None
         """
-        confirmed = False
-        if isinstance(touch, Piece):
-            assert self.confirmed is None and self.selected is None
-            self.confirmed = next((cell for cell in self.widgets if cell.piece == touch), None)
-            if self.confirmed is None:
-                raise ValueError('Invalid piece to confirm.')
-            confirmed = True
-        else:
-            if self.selected is not None and self.confirmed is None:
-                self.confirmed = self.selected
-                self.selected = None
-                confirmed = True
-        if confirmed:
-            self.confirmed.set_background_color(Colors.confirmed)
-            self.board.current_player = next_player(self.board.current_player)
-            if self.board.game_mode == GameMode.single_player and self.board.current_player == Player.computer:
-                self.board.computer_move()
+        if self.confirmed is not None:
+            return
+        if touch is None:  # Player selected a piece using keyboard or confirm button
+            if self.selected is None:
+                raise ValueError('Cannot confirm piece as a piece has not been selected.')
+            self.confirmed = self.selected
+        else:  # Touch is a piece (function was called from insert)
+            self.confirmed = self.get_cell_from_piece(touch)
+        self.confirmed.set_background_color(Colors.confirmed)
+        self.board.current_player = next_player(self.board.current_player)
+        self.selected = None
+        if self.board.game_mode == GameMode.single_player and self.board.current_player == Player.computer:
+            self.board.computer_move()
+
+    def get_cell_from_piece(self, piece: Piece) -> Cell:
+        """
+        :param piece:   A piece object
+        :return:        The cell object that represents it from self.widgets
+        """
+        try:
+            return next(cell for cell in self.widgets if cell.piece == piece)
+        except StopIteration:
+            raise ValueError(':piece: is not selectable!.')
 
     def remove_confirmed(self) -> None:
         """
         Remove the confirmed piece from :self.widgets: and :self.pieces_set:
         :return:    None
         """
-        assert self.confirmed is not None
+        if self.confirmed is None:
+            raise TypeError('A piece needs to be confirmed in order to remove it!')
         self.confirmed.canvas.before.clear()
         self.widgets.remove(self.confirmed)
         self.pieces_set.remove(self.confirmed.piece)
@@ -291,13 +313,18 @@ class PiecesBar(BoxLayout):
         :param touch:   The piece to select
         :return:        None
         """
-        if self.confirmed is None:
-            if self.selected is not None:
-                self.selected.canvas.before.clear()
-            self.selected = touch
-            touch.set_background_color(Colors.selected)
+        if self.confirmed is not None:
+            return
+        if self.selected is not None:
+            self.selected.canvas.before.clear()
+        self.selected = touch
+        touch.set_background_color(Colors.selected)
 
     def clear_all(self) -> None:
+        """
+        Removes all widgets from the current instance
+        :return:    None
+        """
         while len(self.widgets) > 0:
             self.remove_widget(self.widgets[0])
             del self.widgets[0]
@@ -305,6 +332,10 @@ class PiecesBar(BoxLayout):
         self.selected = None
 
     def reset(self) -> None:
+        """
+        Resets the PiecesBar to it's inital state
+        :return:    None
+        """
         self.remove_widget(self.confirm_button)
         self.clear_all()
         self.pieces_set = PiecesBar.generate_pieces_set()
@@ -312,10 +343,11 @@ class PiecesBar(BoxLayout):
         self.add_widget(self.confirm_button)
 
     def reselect(self) -> None:
+        """
+        Redraws the background of selected and confirmed pieces on window resize
+        :return:    None
+        """
         if self.selected is not None:
             self.selected.set_background_color(Colors.selected)
         elif self.confirmed is not None:
             self.confirmed.set_background_color(Colors.confirmed)
-
-    def __len__(self) -> int:
-        return len(self.widgets)

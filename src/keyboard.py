@@ -8,13 +8,13 @@ Contains the implementation of the keyboard object that gets the user's input
 import sys
 from typing import Callable
 
-from kivy.core.window import Window
+from kivy.core.window import Keyboard as KivyKeyboard, Window
 from kivy.uix.widget import Widget
 
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 
@@ -28,7 +28,7 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
 
     def __init__(self, app: 'QuartoApp', **kwargs) -> None:
         super().__init__(**kwargs)
-        self._keyboard: 'Kivy Keyboard' = Window.request_keyboard(self._disable_keyboard, self)
+        self._keyboard: KivyKeyboard = Window.request_keyboard(self._disable_keyboard, self)
         self._app: 'QuartoApp' = app
         self.key_down: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
         self.key_up: Callable[..., None] = lambda *args: self._on_key_up(args[1][1])
@@ -77,7 +77,7 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
                 if pieces_bar.selected is not None else 0
             relative_widget_index = 1 if key == 'right' else -1
             relative_widget_index = 0 if pieces_bar.selected is None and key == 'right' else relative_widget_index
-            index = (selected_index + relative_widget_index) % len(pieces_bar.widgets)
+            index = (selected_index + relative_widget_index) % len(pieces_bar)
             pieces_bar.select(pieces_bar.widgets[index])
         elif key == 'enter' and pieces_bar.selected is not None:
             pieces_bar.confirm()

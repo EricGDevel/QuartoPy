@@ -1,6 +1,7 @@
 #: kivy 1.11.0
 #: import exit sys.exit
 #: import colors src.constants.Colors
+#: set default_fs 24
 
 <Board>:
     spacing: 10, 10
@@ -10,11 +11,6 @@
         Rectangle:
             pos: self.pos
             size: self.size
-
-<Cell>:
-    allow_stretch: True
-    keep_ratio: True
-
 
 <PiecesBar>:
     orientation: 'horizontal'
@@ -26,6 +22,10 @@
             pos: self.pos
             size: self.size
 
+<Cell>:
+    allow_stretch: True
+    keep_ratio: True
+
 <Message>:
     title: 'Game Over!'
     size_hint: 0.625, 0.625
@@ -33,7 +33,6 @@
     BoxLayout:
         orientation: 'vertical'
         Label:
-            text: ''
             id: message
         BoxLayout:
             orientation: 'horizontal'
@@ -73,11 +72,13 @@
         orientation: 'vertical'
         Button:
             text: 'Restart'
+            font_size: default_fs
             on_release:
                 root.dismiss()
                 if app.sm.current in ('sp', 'mp'): app.sm.current_screen.board.reset()
         Button:
             text: 'Main Menu'
+            font_size: default_fs
             on_release:
                 root.dismiss()
                 if app.sm.current in ('sp', 'mp'): \
@@ -86,41 +87,46 @@
                 app.sm.current = 'menu'
         Button:
             text: 'Close'
+            font_size: default_fs
             on_release: root.dismiss()
-
 
 <MenuLayout>:
     orientation: 'vertical'
 
 <BackButton>:
     text: 'Back'
+    font_size: default_fs
     background_color: colors.cyan
     on_release:
         app.sm.transition.direction = 'right'
         app.sm.current = app.sm.previous()
 
 <DifficultyButton>:
+    font_size: default_fs
     on_release:
         app.sm.transition.direction = 'left'
         app.sm.current = 'sp'
         app.sm.current_screen.board.set_difficulty(self.text.lower())
-        app.sm.current_screen.board.first_move()    # Start Game
+        if app.sm.current_screen.pieces_bar.confirmed is None: app.sm.current_screen.board.first_move()    # Start Game
 
 <MainMenuScreen>:
     MenuLayout:
         Button:
             text: 'Play Quarto'
+            font_size: default_fs
             background_color: colors.green
             on_release:
                 app.sm.transition.direction = 'left'
                 app.sm.current = 'play'
         Button:
             text: 'Instructions'
+            font_size: default_fs
             background_color: colors.blue
             on_release:
                 app.instructions.open()
         Button:
             text: 'Quit'
+            font_size: default_fs
             background_color: colors.red
             on_release: exit(0)
 
@@ -128,16 +134,17 @@
     MenuLayout:
         Button:
             text: 'Single-player'
+            font_size: default_fs
             on_release:
                 app.sm.transition.direction = 'left'
                 app.sm.current = 'diff'
         Button:
             text: 'Multi-player'
+            font_size: default_fs
             on_release:
                 app.sm.transition.direction = 'left'
                 app.sm.current = 'mp'
         BackButton:
-
 
 <DifficultyMenuScreen>:
     MenuLayout:

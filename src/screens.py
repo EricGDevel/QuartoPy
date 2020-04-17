@@ -12,9 +12,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 
 from src.board import Board
-from src.constants import *
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 
@@ -29,8 +28,8 @@ class GameScreen(Screen):
     def __init__(self, **kwargs) -> None:
         super().__init__(name=kwargs['name'])
         self.layout = BoxLayout(orientation='vertical')
-        self.board = Board(game_mode=kwargs.get('game_mode', GameMode.single_player),
-                           first_player=kwargs.get('first_player', Player.computer),
+        self.board = Board(game_mode=kwargs.get('game_mode'),
+                           first_player=kwargs.get('first_player'),
                            difficulty=kwargs.get('difficulty'))
         self.pieces_bar = self.board.pieces_bar
         self.layout.add_widget(self.board)

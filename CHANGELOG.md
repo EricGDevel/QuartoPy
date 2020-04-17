@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## Beta [v1.2.2] - 2020-04-17
+
+### Added:
+- Implemented iterative deepening
+- Documented most remaining undocumented function
+- Added links to articles in documentation
+
+### Fixed:
+- Fixed bug where transpositions corresponded to the wrong gamestate 
+
+
 ## Beta [v1.2.1] - 2020-03-29
 
 

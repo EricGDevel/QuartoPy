@@ -5,7 +5,7 @@ Module option.py
 Contains the Option class
 """
 
-__version__ = '1.2'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 from random import getrandbits
@@ -25,8 +25,8 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, game_state: np.ndarray, piece: Piece, i: int = -1, j: int = -1) -> None:
-        self.__game_state: GameState = GameState(game_state)
+    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = -1, j: int = -1) -> None:
+        self.__game_state: GameState = game_state if isinstance(game_state, GameState) else GameState(game_state)
         self.__piece: Piece = piece
         self.__index: Tuple[int, int] = (i, j)
 
@@ -40,6 +40,12 @@ class Option:
         return isinstance(other, Option) \
                and self.__game_state == other.__game_state \
                and self.__piece == other.piece
+
+    def isValid(self) -> bool:
+        """
+        :return:    If the option has a valid insertion index
+        """
+        return 0 <= self.i < GameState.LENGTH and 0 <= self.j < GameState.LENGTH
 
     @property
     def game_state(self) -> 'GameState':
@@ -64,7 +70,8 @@ class Option:
 
 class Transposition:
 
-    def __init__(self, value: int, flag: TTFlag, depth: int) -> None:
+    def __init__(self, move: Option, value: int, flag: TTFlag, depth: int) -> None:
+        self.__move: Option = move
         self.__value: int = value
         self.__flag: TTFlag = flag
         self.__depth: int = depth
@@ -80,12 +87,17 @@ class Transposition:
         :param beta:    The latest beta value of the search
         :return:        The transposition flag for the current search
         """
-        assert alpha <= beta
+        if alpha > beta:
+            raise ValueError(':alpha: cannot be greater than :beta:!')
         if value <= alpha:
             return TTFlag.upper_bound
         if value >= beta:
             return TTFlag.lower_bound
         return TTFlag.exact
+
+    @property
+    def move(self) -> Option:
+        return self.__move
 
     @property
     def value(self) -> int:
@@ -128,8 +140,9 @@ class GameState:
     def __hash__(self) -> int:
         """
         Uses the Zobrist hashing algorithm to provide a unique hash for the current game state
-        ..seealso:  https://en.wikipedia.org/wiki/Zobrist_hashing
         :return:    A unique hash value for the current game state
+
+        .. seealso:  https://en.wikipedia.org/wiki/Zobrist_hashing
         """
         hash_ = 0
         for i in range(len(self.board)):

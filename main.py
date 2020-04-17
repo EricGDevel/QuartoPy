@@ -5,7 +5,7 @@ Module main.py
 This module contains the source code of the main kivy app and it's runtime code
 """
 
-__version__ = '1.2'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 import os
@@ -15,6 +15,7 @@ from kivy.app import App
 from kivy.config import Config
 from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
+from src.constants import GameMode
 from src.keyboard import Keyboard
 from src.screens import *
 
@@ -83,16 +84,18 @@ class QuartoApp(App):
         os.chdir(path)
 
     @staticmethod
-    def setup_logging() -> None:
+    def setup_logging(level: str = 'info', enabled: bool = True) -> None:
         """
         Sets up the program's logger
-        :return:    None
+        :param level:   The logging level to set
+        :param enabled: Whether to enable logging or not
+        :return:        None
         """
+        Config.set('kivy', 'log_enable', int(enabled))
+        Config.set('kivy', 'log_maxfiles', 20)
+        Config.set('kivy', 'log_level', level)
+        Config.set('kivy', 'log_dir', 'logs')
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
-        Config.set('kivy', 'log_dir', os.path.join(os.getcwd(), 'logs'))
-        Config.set('kivy', 'log_maxfiles', 10)
-        Config.set('kivy', 'log_level', 'info')
-        Config.set('kivy', 'log_enable', 1)
 
     def set_config(self) -> None:
         """
@@ -100,16 +103,15 @@ class QuartoApp(App):
         :return:    None
         """
         QuartoApp.set_cwd()
-        config_exists = os.path.isfile(QuartoApp.CONFIG_FILE)
-        Config.read(QuartoApp.CONFIG_FILE)
-        if not config_exists:
-            # QuartoApp.setup_logging()
-            Config.set('kivy', 'exit_on_escape', 0)
-            Config.set('graphics', 'fullscreen', 0)
-            # Logger.debug("Setup: Config updated.")
-        Config.write()
         self.title = 'Quarto'
         self.icon = os.path.join('assets', 'icon.png')
+        Config.read(QuartoApp.CONFIG_FILE)
+        QuartoApp.setup_logging(enabled=False)
+        Config.set('kivy', 'exit_on_escape', 0)
+        Config.set('graphics', 'fullscreen', 0)
+        Config.set('kivy', 'window_icon', self.icon)
+        Config.write()
+        Config.update_config(QuartoApp.CONFIG_FILE)
 
     def build(self) -> ScreenManager:
         """

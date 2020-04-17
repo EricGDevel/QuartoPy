@@ -5,12 +5,13 @@ Module constants.py
 This module contains all the enums and constants used by the other modules of the project
 """
 
-__version__ = '1.2'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 from enum import Enum
 
 MAX_SCORE: int = 10 ** 5
+MAX_TIME: int = 2
 
 
 class GameMode(Enum):
