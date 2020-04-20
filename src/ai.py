@@ -7,7 +7,7 @@ Uses the NegaMax algorithm with alpha-beta pruning, symmetry detection and a tra
 """
 
 __all__ = ['evaluate', 'has_won', 'iterative_deepening', 'pick_best', 'pick_starting_piece']
-__version__ = '1.2'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 import random
@@ -240,13 +240,12 @@ def iterative_deepening(board: GameState, piece: Piece, pieces_set: Set[Piece], 
     best_move = None
     depth = 0
     run_time = 0
-    while best_move is None or (depth <= max_depth and run_time < MAX_TIME):
+    while best_move is None or (depth <= max_depth and 1.5 * run_time < MAX_TIME):
         best_move, score = alpha_beta(Option(board, piece), deepcopy(pieces_set), sign, alpha, beta, depth)
         if evaluate(best_move.game_state)[0] >= MAX_SCORE:
             break
         depth += 1
         run_time = time() - start_time
-        print(run_time)
     return best_move
 
 
@@ -268,7 +267,7 @@ def alpha_beta(move: Option, pieces_set: Set[Piece], sign: int, alpha: float, be
     """
     original_alpha = alpha
     tt_entry = GameState.transposition_table.get(move)
-    if move.isValid() and tt_entry is not None and tt_entry.depth >= depth:
+    if move.is_valid() and tt_entry is not None and tt_entry.depth >= depth:
         if tt_entry.flag == TTFlag.lower_bound:
             alpha = max(alpha, tt_entry.value)
         elif tt_entry.flag == TTFlag.upper_bound:

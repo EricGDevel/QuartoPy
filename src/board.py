@@ -6,7 +6,7 @@ This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __author__ = 'Eric G.D'
 
 from copy import deepcopy
@@ -21,7 +21,7 @@ from kivy.uix.popup import Popup
 
 from src.ai import *
 from src.constants import *
-from src.option import GameState
+from src.option import GameState, Option
 from src.piece import *
 
 
@@ -44,7 +44,7 @@ class Board(GridLayout):
                                   'max': LENGTH ** 2}  # Bottom rows for debugging
     end_message: Message = None
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs):
         super().__init__()
         self.rows = self.cols = Board.LENGTH
         self.first_player: Player = kwargs.get('first_player', Player.computer)
@@ -112,7 +112,7 @@ class Board(GridLayout):
         self.pieces_bar.confirm(option.piece)
         # Logger.info('Application: Computer placed {} at {}'.format(self.pieces_bar, option.index))
 
-    def negamax(self):
+    def negamax(self) -> Option:
         """
         Calculates the next move by evaluating the possible moves and playing as both sides
 
@@ -227,7 +227,7 @@ class PiecesBar(BoxLayout):
     The bar containing all playable pieces. Is displayed underneath the board
     """
 
-    def __init__(self, board: Board, **kwargs) -> None:
+    def __init__(self, board: Board, **kwargs):
         super().__init__(**kwargs)
         if not isinstance(board, Board):
             raise ValueError(f':board: needs to be a Board object, not {type(board)}!')
@@ -235,7 +235,7 @@ class PiecesBar(BoxLayout):
         self.selected: Union[None, Cell] = None
         self.confirmed: Union[None, Cell] = None
         self.pieces_set: Set[Piece] = PiecesBar.generate_pieces_set()
-        self.widgets: List[Union[Cell, Button]] = []
+        self.widgets: List[Cell] = []
         self.add_pieces()
         self.confirm_button: Button = Button(text='Confirm', size_hint_x=None)
         self.confirm_button.bind(on_release=lambda *args: self.confirm())
@@ -264,20 +264,20 @@ class PiecesBar(BoxLayout):
             self.add_widget(widget)
             self.widgets.append(widget)
 
-    def confirm(self, touch: Piece = None) -> None:
+    def confirm(self, piece: Piece = None) -> None:
         """
         Confirm's the player's selected piece
-        :param touch:   The confirm button
+        :param piece:   The confirm button
         :return:        None
         """
         if self.confirmed is not None:
             return
-        if touch is None:  # Player selected a piece using keyboard or confirm button
+        if piece is None:  # Player selected a piece using keyboard or confirm button
             if self.selected is None:
                 raise ValueError('Cannot confirm piece as a piece has not been selected.')
             self.confirmed = self.selected
         else:  # Touch is a piece (function was called from insert)
-            self.confirmed = self.get_cell_from_piece(touch)
+            self.confirmed = self.get_cell_from_piece(piece)
         self.confirmed.set_background_color(Colors.confirmed)
         self.board.current_player = next_player(self.board.current_player)
         self.selected = None
@@ -307,7 +307,7 @@ class PiecesBar(BoxLayout):
         self.remove_widget(self.confirmed)
         self.confirmed = None
 
-    def select(self, touch) -> None:
+    def select(self, touch: Cell) -> None:
         """
         Selects a piece
         :param touch:   The piece to select

@@ -28,7 +28,7 @@ class Piece:
     NUM_OF_ATTRIBUTES: int = 4
     MAX_NUM: int = (2 ** NUM_OF_ATTRIBUTES) - 1
 
-    def __init__(self, num: int) -> None:
+    def __init__(self, num: int):
         self.__id: int = num
         self.__attributes: Tuple[bool, ...] = Piece.get_attributes(num)
         self.__image: str = os.path.join('assets', f'piece_{str(num).zfill(2)}.png')
@@ -44,7 +44,7 @@ class Piece:
         if not 0 <= num <= Piece.MAX_NUM:
             raise ValueError(f':num: needs to be between 0 and {Piece.MAX_NUM}.')
         binary_str = format(num, 'b').zfill(Piece.NUM_OF_ATTRIBUTES)
-        attributes = tuple(bit == '1' for bit in binary_str)
+        attributes = tuple(bit != '0' for bit in binary_str)
         return attributes
 
     def __eq__(self, other: Any) -> bool:
@@ -62,7 +62,7 @@ class Piece:
         """
         attribute_strings = (('Small', 'Large'), ('Square', 'Round'), ('Solid', 'Hollow'), ('Black', 'White'))
         attributes = [1 if att else 0 for att in self.__attributes]
-        return '{' + ', '.join(attribute_strings[i][att] for i, att in enumerate(attributes)) + '}'
+        return f'({", ".join(attribute_strings[i][att] for i, att in enumerate(attributes))})'
 
     @property
     def attributes(self) -> Tuple[bool, ...]:
@@ -106,22 +106,17 @@ class Cell(ButtonBehavior, AsyncImage):
     def __init__(self, piece: Union[None, int, Piece] = None):
         ButtonBehavior.__init__(self)
         AsyncImage.__init__(self)
-        if isinstance(piece, int):
-            piece = Piece(piece)
-        if not (piece is None or isinstance(piece, Piece)):
-            raise TypeError(f'{type(piece)} is not a valid type for :piece:!')
-        self.__piece: Union[None, Piece] = piece
-        self.source = piece.image if piece is not None else Cell.BLANK_IMAGE
+        self.piece = piece
 
     @property
     def piece(self) -> Piece:
         return self.__piece
 
     @piece.setter
-    def piece(self, p: Union[None, int, Piece]) -> None:
+    def piece(self, p: Union[None, int, Piece]):
         if isinstance(p, int):
             self.__piece = Piece(p)
-        if not (p is None or isinstance(p, Piece)):
+        elif not (p is None or isinstance(p, Piece)):
             raise TypeError(f'{type(p)} is not a valid type for :p:!')
         self.__piece: Piece = p
         self.source = p.image if p is not None else Cell.BLANK_IMAGE

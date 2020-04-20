@@ -25,7 +25,7 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = -1, j: int = -1) -> None:
+    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = -1, j: int = -1):
         self.__game_state: GameState = game_state if isinstance(game_state, GameState) else GameState(game_state)
         self.__piece: Piece = piece
         self.__index: Tuple[int, int] = (i, j)
@@ -41,7 +41,7 @@ class Option:
                and self.__game_state == other.__game_state \
                and self.__piece == other.piece
 
-    def isValid(self) -> bool:
+    def is_valid(self) -> bool:
         """
         :return:    If the option has a valid insertion index
         """
@@ -70,7 +70,7 @@ class Option:
 
 class Transposition:
 
-    def __init__(self, move: Option, value: int, flag: TTFlag, depth: int) -> None:
+    def __init__(self, move: Option, value: int, flag: TTFlag, depth: int):
         self.__move: Option = move
         self.__value: int = value
         self.__flag: TTFlag = flag
@@ -140,9 +140,10 @@ class GameState:
     def __hash__(self) -> int:
         """
         Uses the Zobrist hashing algorithm to provide a unique hash for the current game state
-        :return:    A unique hash value for the current game state
+        :return:        A unique hash value for the current game state
 
-        .. seealso:  https://en.wikipedia.org/wiki/Zobrist_hashing
+        .. seealso:     https://en.wikipedia.org/wiki/Zobrist_hashing
+                        https://www.chessprogramming.org/Zobrist_Hashing
         """
         hash_ = 0
         for i in range(len(self.board)):

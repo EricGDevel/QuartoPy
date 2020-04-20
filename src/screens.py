@@ -25,7 +25,7 @@ class GameScreen(Screen):
     Contains the main game's layout, including the board and piece selection bar
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs):
         super().__init__(name=kwargs['name'])
         self.layout = BoxLayout(orientation='vertical')
         self.board = Board(game_mode=kwargs.get('game_mode'),
@@ -85,7 +85,7 @@ class Instructions(Popup):
     A popup that contains the rules of the game
     """
 
-    def __init__(self, src: str, **kwargs) -> None:
+    def __init__(self, src: str, **kwargs):
         super().__init__(**kwargs)
         self.ids['img'].source = src
 

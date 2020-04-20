@@ -75,15 +75,6 @@ class QuartoApp(App):
         return QuartoApp.pause_menu
 
     @staticmethod
-    def set_cwd() -> None:
-        """
-        Sets the current working directory to this file's (main.py) base folder
-        :return:    None
-        """
-        path = os.path.dirname(os.path.realpath(__file__))
-        os.chdir(path)
-
-    @staticmethod
     def setup_logging(level: str = 'info', enabled: bool = True) -> None:
         """
         Sets up the program's logger
@@ -91,25 +82,23 @@ class QuartoApp(App):
         :param enabled: Whether to enable logging or not
         :return:        None
         """
-        Config.set('kivy', 'log_enable', int(enabled))
+        enable_value = 1 if enabled else 0  # Written explicitly for readability instead of int(enabled)
+        Config.set('kivy', 'log_enable', enable_value)
         Config.set('kivy', 'log_maxfiles', 20)
         Config.set('kivy', 'log_level', level)
         Config.set('kivy', 'log_dir', 'logs')
         Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
 
-    def set_config(self) -> None:
+    @staticmethod
+    def set_config() -> None:
         """
         Configures the program
         :return:    None
         """
-        QuartoApp.set_cwd()
-        self.title = 'Quarto'
-        self.icon = os.path.join('assets', 'icon.png')
         Config.read(QuartoApp.CONFIG_FILE)
-        QuartoApp.setup_logging(enabled=False)
+        QuartoApp.setup_logging(enabled=True)
         Config.set('kivy', 'exit_on_escape', 0)
         Config.set('graphics', 'fullscreen', 0)
-        Config.set('kivy', 'window_icon', self.icon)
         Config.write()
         Config.update_config(QuartoApp.CONFIG_FILE)
 
@@ -119,12 +108,14 @@ class QuartoApp(App):
         Called by QuartoApp.run()
         :return:    The application's ScreenManager, used as the base widget for the window
         """
-        self.set_config()
         QuartoApp.setup_instructions()
         QuartoApp.setup_pause_menu()
         QuartoApp.keyboard = Keyboard(self)
+        self.title = 'Quarto'
+        self.icon = os.path.join('assets', 'icon.png')
         return QuartoApp.get_screen_manager()
 
 
 if __name__ == '__main__':
+    QuartoApp.set_config()
     QuartoApp().run()

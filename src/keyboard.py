@@ -26,7 +26,7 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
     A wrapper for the kivy keyboard object that provides keyboard controls
     """
 
-    def __init__(self, app: 'QuartoApp', **kwargs) -> None:
+    def __init__(self, app: 'QuartoApp', **kwargs):
         super().__init__(**kwargs)
         self._keyboard: KivyKeyboard = Window.request_keyboard(self._disable_keyboard, self)
         self._app: 'QuartoApp' = app
@@ -56,6 +56,11 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
             self.toggle_pause_menu()
 
     def toggle_pause_menu(self) -> None:
+        """
+        Toggles the pause menu (If in-game)
+        Exits the program (If not in-game)
+        :return:    None
+        """
         if self._app.sm.current not in ('sp', 'mp'):
             sys.exit()
         if not self._app.paused:
@@ -83,6 +88,10 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
             pieces_bar.confirm()
 
     def _disable_keyboard(self) -> None:
+        """
+        Disables this keyboard (Called when the requested keyboard is closed)
+        :return:    None
+        """
         self._keyboard.unbind(on_key_down=self.key_down)
         self._keyboard.unbind(on_key_up=self.key_up)
         self._keyboard = None

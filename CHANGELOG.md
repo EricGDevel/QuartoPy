@@ -8,7 +8,11 @@
 - Added links to articles in documentation
 
 ### Fixed:
-- Fixed bug where transpositions corresponded to the wrong gamestate 
+- Fixed bug where transpositions corresponded to the wrong gamestate
+
+### Removed:
+
+- Removed redundant Quarto.set_cwd() function 
 
 
 ## Beta [v1.2.1] - 2020-03-29
