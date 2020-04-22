@@ -13,7 +13,7 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 
 import numpy as np
 
-from src.constants import TTFlag
+from src.constants import TTFlag, NO_INDEX, HASH_BITS
 from src.piece import Piece
 
 
@@ -25,7 +25,7 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = -1, j: int = -1):
+    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = NO_INDEX, j: int = NO_INDEX):
         self.__game_state: GameState = game_state if isinstance(game_state, GameState) else GameState(game_state)
         self.__piece: Piece = piece
         self.__index: Tuple[int, int] = (i, j)
@@ -114,18 +114,16 @@ class Transposition:
 
 class GameState:
     LENGTH: int = 4
-    zobrist_table: Union[None, List[List[List[int]]]] = None
-    selected_table: Union[None, List[int]] = None
-    transposition_table: Union[None, Dict[Option, Transposition]] = None
+    zobrist_table: List[List[List[int]]] = []
+    selected_table: List[int] = []
+    transposition_table: Dict[Option, Transposition] = {}
 
     def __init__(self, state: Union[np.ndarray, List[List[Piece]]]):
         if not len(state) == len(state[0]) == GameState.LENGTH:
             raise ValueError("Invalid dimensions for :state:, should be a {0}x{0} array!".format(GameState.LENGTH))
         self.__board: np.ndarray = np.array(state)
-        if GameState.zobrist_table is None:
+        if not GameState.zobrist_table:
             GameState.__zobrist_init()
-        if GameState.transposition_table is None:
-            GameState.transposition_table = {}
 
     @property
     def board(self) -> np.ndarray:
@@ -168,7 +166,7 @@ class GameState:
         Initialises the zobrist table with random 64 bit numbers
         :return:    None
         """
-        table = [[[getrandbits(64) for _ in range(Piece.MAX_NUM + 1)]  # For pieces in the board
+        table = [[[getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For pieces in the board
                   for _ in range(GameState.LENGTH)] for _ in range(GameState.LENGTH)]
         GameState.zobrist_table = table
-        GameState.selected_table = [getrandbits(64) for _ in range(Piece.MAX_NUM + 1)]  # For selected piece
+        GameState.selected_table = [getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For selected piece

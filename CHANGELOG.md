@@ -7,8 +7,15 @@
 - Documented most remaining undocumented function
 - Added links to articles in documentation
 
+### Changed:
+
+- The first player no longer changes at the end of the game
+- Cleaned up magic numbers
+
 ### Fixed:
+
 - Fixed bug where transpositions corresponded to the wrong gamestate
+- Fixed documentation typos
 
 ### Removed:
 

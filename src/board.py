@@ -201,9 +201,10 @@ class Board(GridLayout):
         if self.end_message is not None:
             self.end_message.dismiss()
         self.initialise_buttons(reset=True)
-        self.first_player = self.current_player = next_player(self.first_player)
+        self.current_player = self.first_player
         self.turn_num = 1
         self.pieces_bar.reset()
+        GameState.transposition_table.clear()
         self.first_move()
 
     def is_full(self) -> bool:
@@ -333,7 +334,7 @@ class PiecesBar(BoxLayout):
 
     def reset(self) -> None:
         """
-        Resets the PiecesBar to it's inital state
+        Resets the PiecesBar to it's initial state
         :return:    None
         """
         self.remove_widget(self.confirm_button)

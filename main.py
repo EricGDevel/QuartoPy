@@ -104,7 +104,7 @@ class QuartoApp(App):
 
     def build(self) -> ScreenManager:
         """
-        Builds an instance of QuaroApp and starts the main program
+        Builds an instance of QuartoApp and starts the main program
         Called by QuartoApp.run()
         :return:    The application's ScreenManager, used as the base widget for the window
         """

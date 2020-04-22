@@ -13,6 +13,12 @@ from enum import Enum
 MAX_SCORE: int = 10 ** 5
 MAX_TIME: int = 2
 
+NO_INDEX: int = -1
+HASH_BITS: int = 64
+
+NO_ATTRIBUTES: int = -1
+BOTH_ATTRIBUTES: int = -2
+
 
 class GameMode(Enum):
     """
