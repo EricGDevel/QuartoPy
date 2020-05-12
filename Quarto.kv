@@ -30,6 +30,9 @@
     title: 'Game Over!'
     size_hint: 0.625, 0.625
     auto_dismiss: False
+
+    message: message
+
     BoxLayout:
         orientation: 'vertical'
         Label:
@@ -53,6 +56,9 @@
     title: 'Instructions'
     size_hint: 0.8, 0.8
     auto_dismiss: True
+
+    img: img
+
     BoxLayout:
         orientation: 'vertical'
         AsyncImage:
@@ -82,7 +88,6 @@
             on_release:
                 root.dismiss()
                 if app.sm.current in ('sp', 'mp'): \
-                app.sm.current_screen.board.reset()
                 app.sm.transition.direction = 'right'
                 app.sm.current = 'menu'
         Button:

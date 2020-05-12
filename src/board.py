@@ -6,13 +6,15 @@ This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
 
-__version__ = '1.2.2'
+__version__ = '1.3'
 __author__ = 'Eric G.D'
 
+import threading
 from copy import deepcopy
 from math import inf
 from typing import Dict, List, Set, Union
 
+from kivy.clock import mainthread
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -106,10 +108,12 @@ class Board(GridLayout):
         Finds the best move for the computer and plays it
         :return:    None
         """
+        self.disabled = True
         option = self.negamax()
         i, j = option.index
         self.insert_confirmed(self.cell_list[i][j])
         self.pieces_bar.confirm(option.piece)
+        self.disabled = False
         # Logger.info('Application: Computer placed {} at {}'.format(self.pieces_bar, option.index))
 
     def negamax(self) -> Option:
@@ -170,6 +174,7 @@ class Board(GridLayout):
         player_num = 1 if self.current_player == self.first_player else 2
         return f'Player {player_num}'
 
+    @mainthread
     def insert_confirmed(self, cell: Cell) -> bool:
         """
         Inserts the selected piece into cell
@@ -190,7 +195,7 @@ class Board(GridLayout):
         """
         if self.end_message is None:
             self.end_message = Message()
-        self.end_message.ids['message'].text = message
+        self.end_message.message.text = message
         self.end_message.open()
 
     def reset(self) -> None:
@@ -262,9 +267,10 @@ class PiecesBar(BoxLayout):
         for piece in self.pieces_set:
             widget = Cell(piece)
             widget.bind(on_release=self.select)
-            self.add_widget(widget)
+            self.add_widget(widget, -piece.id)  # Inserts the widget based on id number in ascending order
             self.widgets.append(widget)
 
+    @mainthread
     def confirm(self, piece: Piece = None) -> None:
         """
         Confirm's the player's selected piece
@@ -283,7 +289,8 @@ class PiecesBar(BoxLayout):
         self.board.current_player = next_player(self.board.current_player)
         self.selected = None
         if self.board.game_mode == GameMode.single_player and self.board.current_player == Player.computer:
-            self.board.computer_move()
+            threading.Thread(target=self.board.computer_move).start()
+            # Runs AI on separate thread to prevent the application from freezing
 
     def get_cell_from_piece(self, piece: Piece) -> Cell:
         """
@@ -321,24 +328,15 @@ class PiecesBar(BoxLayout):
         self.selected = touch
         touch.set_background_color(Colors.selected)
 
-    def clear_all(self) -> None:
-        """
-        Removes all widgets from the current instance
-        :return:    None
-        """
-        while len(self.widgets) > 0:
-            self.remove_widget(self.widgets[0])
-            del self.widgets[0]
-        self.confirmed = None
-        self.selected = None
-
     def reset(self) -> None:
         """
         Resets the PiecesBar to it's initial state
         :return:    None
         """
-        self.remove_widget(self.confirm_button)
-        self.clear_all()
+        self.clear_widgets()
+        self.widgets.clear()
+        self.confirmed = None
+        self.selected = None
         self.pieces_set = PiecesBar.generate_pieces_set()
         self.add_pieces()
         self.add_widget(self.confirm_button)

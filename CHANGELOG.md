@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Beta [v1.3] - 2020-05-12
+
+## Changed:
+
+- Minimax is now run on a separate thread to prevent freezing
+- Cleaned up code
+- Implemented _\_future\__ annotations
+
+
 ## Beta [v1.2.2] - 2020-04-17
 
 ### Added:

@@ -13,7 +13,7 @@ from kivy.uix.screenmanager import Screen
 
 from src.board import Board
 
-__version__ = '1.2.2'
+__version__ = '1.3'
 __author__ = 'Eric G.D'
 
 
@@ -87,7 +87,7 @@ class Instructions(Popup):
 
     def __init__(self, src: str, **kwargs):
         super().__init__(**kwargs)
-        self.ids['img'].source = src
+        self.img.source = src
 
 
 class PauseMenu(Popup):

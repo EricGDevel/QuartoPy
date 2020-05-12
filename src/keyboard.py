@@ -5,6 +5,11 @@ Module keyboard.py
 Contains the implementation of the keyboard object that gets the user's input
 """
 
+from __future__ import annotations
+import typing
+if typing.TYPE_CHECKING:
+    from main import QuartoApp
+
 import sys
 from typing import Callable
 
@@ -14,7 +19,7 @@ from kivy.uix.widget import Widget
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.2.2'
+__version__ = '1.3'
 __author__ = 'Eric G.D'
 
 
@@ -26,10 +31,10 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
     A wrapper for the kivy keyboard object that provides keyboard controls
     """
 
-    def __init__(self, app: 'QuartoApp', **kwargs):
+    def __init__(self, app: QuartoApp, **kwargs):
         super().__init__(**kwargs)
         self._keyboard: KivyKeyboard = Window.request_keyboard(self._disable_keyboard, self)
-        self._app: 'QuartoApp' = app
+        self._app: QuartoApp = app
         self.key_down: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
         self.key_up: Callable[..., None] = lambda *args: self._on_key_up(args[1][1])
         self._keyboard.bind(on_key_down=self.key_down)
@@ -53,6 +58,8 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :return:        None
         """
         if key == 'escape':
+            if not isinstance(self._app.sm.current_screen, GameScreen):
+                sys.exit()
             self.toggle_pause_menu()
 
     def toggle_pause_menu(self) -> None:
@@ -61,8 +68,6 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         Exits the program (If not in-game)
         :return:    None
         """
-        if self._app.sm.current not in ('sp', 'mp'):
-            sys.exit()
         if not self._app.paused:
             self._app.pause_menu.open()
         else:

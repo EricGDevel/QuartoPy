@@ -5,7 +5,9 @@ Module option.py
 Contains the Option class
 """
 
-__version__ = '1.2.2'
+from __future__ import annotations
+
+__version__ = '1.3'
 __author__ = 'Eric G.D'
 
 from random import getrandbits
@@ -25,7 +27,7 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, game_state: Union['GameState', np.ndarray], piece: Piece, i: int = NO_INDEX, j: int = NO_INDEX):
+    def __init__(self, game_state: Union[GameState, np.ndarray], piece: Piece, i: int = NO_INDEX, j: int = NO_INDEX):
         self.__game_state: GameState = game_state if isinstance(game_state, GameState) else GameState(game_state)
         self.__piece: Piece = piece
         self.__index: Tuple[int, int] = (i, j)
@@ -48,7 +50,7 @@ class Option:
         return 0 <= self.i < GameState.LENGTH and 0 <= self.j < GameState.LENGTH
 
     @property
-    def game_state(self) -> 'GameState':
+    def game_state(self) -> GameState:
         return self.__game_state
 
     @property
@@ -120,7 +122,7 @@ class GameState:
 
     def __init__(self, state: Union[np.ndarray, List[List[Piece]]]):
         if not len(state) == len(state[0]) == GameState.LENGTH:
-            raise ValueError("Invalid dimensions for :state:, should be a {0}x{0} array!".format(GameState.LENGTH))
+            raise ValueError('Invalid dimensions for :state:, should be a {0}x{0} array!'.format(GameState.LENGTH))
         self.__board: np.ndarray = np.array(state)
         if not GameState.zobrist_table:
             GameState.__zobrist_init()
@@ -168,5 +170,5 @@ class GameState:
         """
         table = [[[getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For pieces in the board
                   for _ in range(GameState.LENGTH)] for _ in range(GameState.LENGTH)]
-        GameState.zobrist_table = table
-        GameState.selected_table = [getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For selected piece
+        GameState.zobrist_table[:] = table
+        GameState.selected_table[:] = [getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For selected piece
