@@ -5,7 +5,10 @@ Module screens.py
 This module contains all the Screen objects and the widgets that they use,
 that are in turn used by the App's ScreenManager
 """
+
 from __future__ import annotations
+
+from pathlib import Path
 
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -87,9 +90,9 @@ class Instructions(Popup):
 
     image_path = StringProperty("")
 
-    def __init__(self, src: str, **kwargs):
+    def __init__(self, src: Path, **kwargs):
         super().__init__(**kwargs)
-        self.image_path = src
+        self.image_path = str(src)
 
 
 class PauseMenu(Popup):

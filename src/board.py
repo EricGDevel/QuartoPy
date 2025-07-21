@@ -5,6 +5,7 @@ Module board.py
 This module contains the Board and PieceBar objects that are used by GameScreen
 Note: Board contains all game functions that don't relate to AI
 """
+
 from __future__ import annotations
 
 __version__ = "1.3"
@@ -22,10 +23,23 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.popup import Popup
 
-from src.ai import *
-from src.constants import *
+from src.ai import (
+    has_won,
+    iterative_deepening,
+    pick_best,
+    pick_starting_piece,
+)
+from src.constants import (
+    Colors,
+    GameMode,
+    Player,
+    next_player,
+)
 from src.option import GameState, Option
-from src.piece import *
+from src.piece import (
+    Cell,
+    Piece,
+)
 
 
 class Message(Popup):
@@ -259,9 +273,9 @@ class PiecesBar(BoxLayout):
         self.widgets: list[Cell] = []
         self.add_pieces()
         self.confirm_button: Button = Button(text="Confirm", size_hint_x=None)
-        self.confirm_button.bind(on_release=lambda *args: self.confirm())
+        self.confirm_button.bind(on_release=lambda *_: self.confirm())
         self.add_widget(self.confirm_button)
-        Window.bind(on_resize=lambda *args: self.reselect())
+        Window.bind(on_resize=lambda *_: self.reselect())
 
     def __len__(self) -> int:
         return len(self.widgets)
@@ -321,8 +335,8 @@ class PiecesBar(BoxLayout):
         """
         try:
             return next(cell for cell in self.widgets if cell.piece == piece)
-        except StopIteration:
-            raise ValueError(":piece: is not selectable!.")
+        except StopIteration as e:
+            raise ValueError(":piece: is not selectable!.") from e
 
     def remove_confirmed(self) -> None:
         """

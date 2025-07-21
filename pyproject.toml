@@ -30,7 +30,6 @@ select = [
     "ICN", # flake8-import-conventions
     "PL",  # pylint
     "PIE", # flake8-pie
-    "S",   # bandit
     "T20", # flake8-print
     "RET", # flake8-return
     "TID", # flake8-tidy-imports

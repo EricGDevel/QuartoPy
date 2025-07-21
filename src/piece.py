@@ -4,13 +4,14 @@ Module piece.py
 
 Contains the declarations of the Piece and Cell classes.
 """
+
 from __future__ import annotations
 
 __all__ = ["Piece", "Cell"]
 __version__ = "1.3"
 __author__ = "Eric G.D"
 
-import os
+from pathlib import Path
 from typing import Any
 
 from kivy.clock import Clock
@@ -33,7 +34,7 @@ class Piece:
     def __init__(self, num: int):
         self.__id: int = num
         self.__attributes: tuple[bool, ...] = Piece.get_attributes(num)
-        self.__image: str = os.path.join("assets", f"piece_{str(num).zfill(2)}.png")
+        self.__image: Path = Path("assets", f"piece_{str(num).zfill(2)}.png")
 
     @staticmethod
     def get_attributes(num: int) -> tuple[bool, ...]:
@@ -46,8 +47,7 @@ class Piece:
         if not 0 <= num <= Piece.MAX_NUM:
             raise ValueError(f":num: needs to be between 0 and {Piece.MAX_NUM}.")
         binary_str = format(num, "b").zfill(Piece.NUM_OF_ATTRIBUTES)
-        attributes = tuple(bit != "0" for bit in binary_str)
-        return attributes
+        return tuple(bit != "0" for bit in binary_str)
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Piece) and other.__id == self.__id
@@ -92,7 +92,7 @@ class Piece:
         return self.__attributes[3]
 
     @property
-    def image(self) -> str:
+    def image(self) -> Path:
         return self.__image
 
     @property
@@ -109,7 +109,7 @@ class Cell(ButtonBehavior, AsyncImage):
     This class is a graphic wrapper for Piece
     """
 
-    BLANK_IMAGE = os.path.join("assets", "blank.png")
+    BLANK_IMAGE = Path("assets", "blank.png")
 
     def __init__(self, piece: None | int | Piece = None):
         ButtonBehavior.__init__(self)
@@ -127,7 +127,7 @@ class Cell(ButtonBehavior, AsyncImage):
         elif not (p is None or isinstance(p, Piece)):
             raise TypeError(f"{type(p)} is not a valid type for :p:!")
         self.__piece: Piece = p
-        self.source = p.image if p is not None else Cell.BLANK_IMAGE
+        self.source = str(p.image if p is not None else Cell.BLANK_IMAGE)
 
     def set_background_color(self, color: tuple[int, int, int, int]) -> None:
         """
@@ -137,7 +137,7 @@ class Cell(ButtonBehavior, AsyncImage):
         :return:        None
         """
         self.canvas.before.clear()
-        Clock.schedule_once(lambda *args: self.__set_bg_color(color))
+        Clock.schedule_once(lambda *_: self.__set_bg_color(color))
 
     def __set_bg_color(self, color: tuple[int, int, int, int]) -> None:
         """

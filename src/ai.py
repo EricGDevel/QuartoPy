@@ -5,6 +5,7 @@ Module ai.py
 Contains all AI functions that allow the computer to make the best move.
 Uses the NegaMax algorithm with alpha-beta pruning, symmetry detection and a transposition table.
 """
+
 from __future__ import annotations
 
 __all__ = [
@@ -25,7 +26,12 @@ from time import time
 import numpy as np
 
 from src.constants import BOTH_ATTRIBUTES, MAX_SCORE, MAX_TIME, NO_ATTRIBUTES
-from src.option import *
+from src.option import (
+    GameState,
+    Option,
+    Transposition,
+    TTFlag,
+)
 from src.piece import Piece
 
 
@@ -207,7 +213,7 @@ def contains_symmetries(
     symmetries = get_symmetries(option.board)
     return any(
         any(np.array_equal(symmetry, board) for symmetry in symmetries)
-        for board in map(lambda tuple_: tuple_[0][0].game_state.board, options)
+        for board in (tuple_[0][0].game_state.board for tuple_ in options)
         # All options in options[i] have same game_state
     )
 

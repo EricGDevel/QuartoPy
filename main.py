@@ -4,12 +4,13 @@ Module main.py
 
 This module contains the source code of the main kivy app and it's runtime code
 """
+
 from __future__ import annotations
 
 __version__ = "1.3"
 __author__ = "Eric G.D"
 
-import os
+from pathlib import Path
 
 import kivy
 from kivy.app import App
@@ -18,7 +19,14 @@ from kivy.uix.screenmanager import ScreenManager, SlideTransition
 
 from src.constants import GameMode
 from src.keyboard import Keyboard
-from src.screens import *
+from src.screens import (
+    DifficultyMenuScreen,
+    GameScreen,
+    Instructions,
+    MainMenuScreen,
+    PauseMenu,
+    PlayMenuScreen,
+)
 
 kivy.require("2.3.1")
 
@@ -65,9 +73,7 @@ class QuartoApp(App):
         :return:    A reference to QuartoApp.instructions
         """
         if QuartoApp.instructions is None:
-            QuartoApp.instructions = Instructions(
-                os.path.join("assets", "instructions.jpg")
-            )
+            QuartoApp.instructions = Instructions(Path("assets", "instructions.jpg"))
         return QuartoApp.instructions
 
     @staticmethod
@@ -121,7 +127,7 @@ class QuartoApp(App):
         QuartoApp.setup_pause_menu()
         QuartoApp.keyboard = Keyboard(self)
         self.title = "Quarto"
-        self.icon = os.path.join("assets", "icon.png")
+        self.icon = str(Path("assets", "icon.png"))
         return QuartoApp.get_screen_manager()
 
 
