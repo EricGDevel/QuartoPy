@@ -5,6 +5,7 @@ Module screens.py
 This module contains all the Screen objects and the widgets that they use,
 that are in turn used by the App's ScreenManager
 """
+from __future__ import annotations
 
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -14,8 +15,8 @@ from kivy.uix.screenmanager import Screen
 
 from src.board import Board
 
-__version__ = '1.3'
-__author__ = 'Eric G.D'
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
 
 class GameScreen(Screen):
@@ -27,11 +28,13 @@ class GameScreen(Screen):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(name=kwargs['name'])
-        self.layout = BoxLayout(orientation='vertical')
-        self.board = Board(game_mode=kwargs.get('game_mode'),
-                           first_player=kwargs.get('first_player'),
-                           difficulty=kwargs.get('difficulty'))
+        super().__init__(name=kwargs["name"])
+        self.layout = BoxLayout(orientation="vertical")
+        self.board = Board(
+            game_mode=kwargs.get("game_mode"),
+            first_player=kwargs.get("first_player"),
+            difficulty=kwargs.get("difficulty"),
+        )
         self.pieces_bar = self.board.pieces_bar
         self.layout.add_widget(self.board)
         self.layout.add_widget(self.pieces_bar)
@@ -45,7 +48,6 @@ class MainMenuScreen(Screen):
 
     The main menu screen that allows the user to navigate to the Play and Settings screens, and exit the program
     """
-    pass
 
 
 class PlayMenuScreen(Screen):
@@ -55,7 +57,6 @@ class PlayMenuScreen(Screen):
 
     Used to let the player to select what GameMode they would like to play
     """
-    pass
 
 
 class DifficultyMenuScreen(Screen):
@@ -65,7 +66,6 @@ class DifficultyMenuScreen(Screen):
 
     This menu allows the player to choose the difficulty of their AI opponent
     """
-    pass
 
 
 class MenuLayout(BoxLayout):
@@ -75,7 +75,6 @@ class MenuLayout(BoxLayout):
 
     Used to contain the contents of the menu screens
     """
-    pass
 
 
 class Instructions(Popup):
@@ -100,7 +99,6 @@ class PauseMenu(Popup):
 
     A popup that allows the player to go to the main menu or restart
     """
-    pass
 
 
 class BackButton(Button):
@@ -110,7 +108,6 @@ class BackButton(Button):
 
     Moves back one screen when pressed
     """
-    pass
 
 
 class DifficultyButton(Button):
@@ -120,4 +117,3 @@ class DifficultyButton(Button):
 
     Selects the game's difficulty when pressed
     """
-    pass

@@ -6,21 +6,24 @@ Contains the implementation of the keyboard object that gets the user's input
 """
 
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from main import QuartoApp
 
+from collections.abc import Callable
 import sys
-from typing import Callable
 
-from kivy.core.window import Keyboard as KivyKeyboard, Window
+from kivy.core.window import Keyboard as KivyKeyboard
+from kivy.core.window import Window
 from kivy.uix.widget import Widget
 
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = '1.3'
-__author__ = 'Eric G.D'
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
 
 class Keyboard(Widget):  # Is a subclass of widget to provide window resizing support
@@ -33,9 +36,13 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
 
     def __init__(self, app: QuartoApp, **kwargs):
         super().__init__(**kwargs)
-        self._keyboard: KivyKeyboard = Window.request_keyboard(self._disable_keyboard, self)
+        self._keyboard: KivyKeyboard = Window.request_keyboard(
+            self._disable_keyboard, self
+        )
         self._app: QuartoApp = app
-        self.key_down: Callable[..., None] = lambda *args: self._on_key_down(args[1][1])  # Get pressed key from args
+        self.key_down: Callable[..., None] = lambda *args: self._on_key_down(
+            args[1][1]
+        )  # Get pressed key from args
         self.key_up: Callable[..., None] = lambda *args: self._on_key_up(args[1][1])
         self._keyboard.bind(on_key_down=self.key_down)
         self._keyboard.bind(on_key_up=self.key_up)
@@ -46,8 +53,11 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :param key:     The key that was pressed
         :return:        None
         """
-        pieces_bar = self._app.sm.current_screen.pieces_bar \
-            if isinstance(self._app.sm.current_screen, GameScreen) else None
+        pieces_bar = (
+            self._app.sm.current_screen.pieces_bar
+            if isinstance(self._app.sm.current_screen, GameScreen)
+            else None
+        )
         if isinstance(pieces_bar, PiecesBar) and pieces_bar.confirmed is None:
             Keyboard.__keyboard_select(pieces_bar, key)
 
@@ -57,7 +67,7 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :param key:     The key that was pressed
         :return:        None
         """
-        if key == 'escape':
+        if key == "escape":
             if not isinstance(self._app.sm.current_screen, GameScreen):
                 sys.exit()
             self.toggle_pause_menu()
@@ -82,14 +92,21 @@ class Keyboard(Widget):  # Is a subclass of widget to provide window resizing su
         :param key:         The key that was pressed
         :return:            None
         """
-        if key in ('left', 'right'):
-            selected_index = pieces_bar.widgets.index(pieces_bar.selected) \
-                if pieces_bar.selected is not None else 0
-            relative_widget_index = 1 if key == 'right' else -1
-            relative_widget_index = 0 if pieces_bar.selected is None and key == 'right' else relative_widget_index
+        if key in ("left", "right"):
+            selected_index = (
+                pieces_bar.widgets.index(pieces_bar.selected)
+                if pieces_bar.selected is not None
+                else 0
+            )
+            relative_widget_index = 1 if key == "right" else -1
+            relative_widget_index = (
+                0
+                if pieces_bar.selected is None and key == "right"
+                else relative_widget_index
+            )
             index = (selected_index + relative_widget_index) % len(pieces_bar)
             pieces_bar.select(pieces_bar.widgets[index])
-        elif key == 'enter' and pieces_bar.selected is not None:
+        elif key == "enter" and pieces_bar.selected is not None:
             pieces_bar.confirm()
 
     def _disable_keyboard(self) -> None:

@@ -4,13 +4,14 @@ Module constants.py
 
 This module contains all the enums and constants used by the other modules of the project
 """
+from __future__ import annotations
 
 from enum import Enum
 
-__version__ = '1.3'
-__author__ = 'Eric G.D'
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
-MAX_SCORE: int = 10 ** 5
+MAX_SCORE: int = 10**5
 MAX_TIME: int = 2
 
 NO_INDEX: int = -1
@@ -28,6 +29,7 @@ class GameMode(Enum):
     An enum that contains all the possible game modes.
     Used by board to determine what happens after a player makes as move
     """
+
     single_player = 0
     multi_player = 1
 
@@ -40,6 +42,7 @@ class Player(Enum):
     An enum containing the types/numbers of the current players
     Used by Board to assign minimising/maximising signs to NegaMax and to display the end of game message
     """
+
     human = 1
     computer = 2
 
@@ -56,6 +59,7 @@ class TTFlag(Enum):
     lower_bound:    Similar to upper_bound, the previously calculated score is a lower_bound and thus the beta
                     value of the current calculation can be updated to reduce search time
     """
+
     exact = 0
     lower_bound = 1
     upper_bound = 2
@@ -76,6 +80,7 @@ class Colors:
 
     A class containing rgba tuples for colors used in the UI
     """
+
     selected = (0.8, 0.8, 0.2, 0.8)
     confirmed = (0.2, 0.8, 0.2, 0.8)
     board = (0.5, 0.5, 0.5, 1)

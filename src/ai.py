@@ -5,20 +5,26 @@ Module ai.py
 Contains all AI functions that allow the computer to make the best move.
 Uses the NegaMax algorithm with alpha-beta pruning, symmetry detection and a transposition table.
 """
+from __future__ import annotations
 
-__all__ = ['evaluate', 'has_won', 'iterative_deepening', 'pick_best', 'pick_starting_piece']
-__version__ = '1.3'
-__author__ = 'Eric G.D'
+__all__ = [
+    "evaluate",
+    "has_won",
+    "iterative_deepening",
+    "pick_best",
+    "pick_starting_piece",
+]
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
-import random
 from copy import deepcopy
 from math import inf
+import random
 from time import time
-from typing import Set, Tuple, List, Union
 
 import numpy as np
 
-from src.constants import MAX_SCORE, MAX_TIME, NO_ATTRIBUTES, BOTH_ATTRIBUTES
+from src.constants import BOTH_ATTRIBUTES, MAX_SCORE, MAX_TIME, NO_ATTRIBUTES
 from src.option import *
 from src.piece import Piece
 
@@ -31,7 +37,7 @@ def has_won(state: GameState) -> bool:
     return evaluate(state)[0] == MAX_SCORE
 
 
-def evaluate(state: GameState) -> Tuple[int, List[int]]:
+def evaluate(state: GameState) -> tuple[int, list[int]]:
     """
     :param state:       The GameState to evaluate
     :return:            :board:'s static evaluation and what attributes the next piece needs to have in order to win
@@ -43,23 +49,27 @@ def evaluate(state: GameState) -> Tuple[int, List[int]]:
     winning_attributes = [NO_ATTRIBUTES] * Piece.NUM_OF_ATTRIBUTES
     for row in rows:
         attributes, num_of_pieces = calculate_row_attributes(row)
-        attributes_num = length - attributes.count(NO_ATTRIBUTES) if num_of_pieces > 1 else 0
+        attributes_num = (
+            length - attributes.count(NO_ATTRIBUTES) if num_of_pieces > 1 else 0
+        )
         if attributes_num == 0:
             continue
         if num_of_pieces == length:
             row_scores[:] = [MAX_SCORE]
             break
-        elif num_of_pieces == length - 1:
+        if num_of_pieces == length - 1:
             next_move_wins = update_winning_attributes(winning_attributes, attributes)
             if next_move_wins:
                 row_scores.append(-MAX_SCORE // 2)
                 continue
-        row_scores.append((2 ** num_of_pieces) * attributes_num)  # Multiple shared attributes count as multiple rows
+        row_scores.append(
+            (2**num_of_pieces) * attributes_num
+        )  # Multiple shared attributes count as multiple rows
     score = sum(row_scores)
     return score, winning_attributes
 
 
-def get_rows_from_board(board: GameState) -> List[List[Piece]]:
+def get_rows_from_board(board: GameState) -> list[list[Piece]]:
     """
     :param board:   The current gamestate that is being evaluated
     :return:        A list of all the rows in the board
@@ -80,7 +90,7 @@ def get_rows_from_board(board: GameState) -> List[List[Piece]]:
     return rows + cols + diagonals
 
 
-def calculate_row_attributes(row: List[Piece]) -> Tuple[List[Union[bool, int]], int]:
+def calculate_row_attributes(row: list[Piece]) -> tuple[list[bool | int], int]:
     """
     :param row:     A row in the board
     :return:        A tuple containing the shared attributes and the number of pieces
@@ -89,15 +99,23 @@ def calculate_row_attributes(row: List[Piece]) -> Tuple[List[Union[bool, int]], 
     for piece in row:
         if piece is None:
             continue
-        attributes[:] = piece.attributes if num_of_pieces == 0 else \
-            map(lambda x, y: x if x == y else NO_ATTRIBUTES, attributes, piece.attributes)
+        attributes[:] = (
+            piece.attributes
+            if num_of_pieces == 0
+            else map(
+                lambda x, y: x if x == y else NO_ATTRIBUTES,
+                attributes,
+                piece.attributes,
+            )
+        )
         # [:] in order to avoid casting and mutate the list
         num_of_pieces += 1
     return attributes, num_of_pieces
 
 
-def update_winning_attributes(winning_attributes: List[Union[bool, int]],
-                              attributes: List[Union[bool, int]]) -> bool:
+def update_winning_attributes(
+    winning_attributes: list[bool | int], attributes: list[bool | int]
+) -> bool:
     """
     :param winning_attributes:  The shared attributes of previous 3-in-a-row rows
     :param attributes:          The attributes of the current 3-in-a-row row
@@ -114,7 +132,7 @@ def update_winning_attributes(winning_attributes: List[Union[bool, int]],
     return next_move_wins
 
 
-def pick_starting_piece(pieces_set: Set[Piece]) -> Piece:
+def pick_starting_piece(pieces_set: set[Piece]) -> Piece:
     """
     :param pieces_set:  A set containing which pieces can be played
     :return:            Which piece the computer should give the player
@@ -122,8 +140,7 @@ def pick_starting_piece(pieces_set: Set[Piece]) -> Piece:
     return random.choice(tuple(pieces_set))
 
 
-def pick_best(board: GameState, piece: Piece,
-              pieces_set: Set[Piece]) -> Option:
+def pick_best(board: GameState, piece: Piece, pieces_set: set[Piece]) -> Option:
     """
     :param board:       The current GameState
     :param piece:       The piece to insert
@@ -132,15 +149,18 @@ def pick_best(board: GameState, piece: Piece,
     """
     pieces_set.remove(piece)
     options = get_options(board, piece, pieces_set, best_moves=True)
-    blacklist = evaluate(options[0].game_state)[1]  # All GameStates in options are the same
+    blacklist = evaluate(options[0].game_state)[
+        1
+    ]  # All GameStates in options are the same
     option = options.pop(0)
     while len(options) > 0 and shared_attributes(option.piece.attributes, blacklist):
         option = options.pop(0)
     return option
 
 
-def get_options(board: GameState, piece: Piece,
-                pieces_set: Set[Piece], best_moves: bool = False) -> List[Option]:
+def get_options(
+    board: GameState, piece: Piece, pieces_set: set[Piece], best_moves: bool = False
+) -> list[Option]:
     """
     :param board:               The current GameState
     :param piece:               The piece to insert
@@ -149,7 +169,7 @@ def get_options(board: GameState, piece: Piece,
     :return:                    A list of all possible moves
     """
     if piece in pieces_set:
-        raise ValueError(':pieces_set: should contain :piece:!')
+        raise ValueError(":pieces_set: should contain :piece:!")
     out = []
     for i in range(len(board)):
         for j in range(len(board[i])):
@@ -166,13 +186,19 @@ def get_options(board: GameState, piece: Piece,
                 score = tt_entry.value if tt_entry is not None else score
                 out.append((option_list, score))
     assert len(out) > 0
-    out.sort(key=lambda x: x[1], reverse=True)  # Sort moves by base score in descending order
-    return out[0][0] if best_moves else [x for option_list in out for x in option_list[0]]
+    out.sort(
+        key=lambda x: x[1], reverse=True
+    )  # Sort moves by base score in descending order
+    return (
+        out[0][0] if best_moves else [x for option_list in out for x in option_list[0]]
+    )
     # Return the list with the highest base score if generating options for pick_best, otherwise flatten the 2D list
     # into a regular list
 
 
-def contains_symmetries(options: List[Tuple[List[Option], int]], option: GameState) -> bool:
+def contains_symmetries(
+    options: list[tuple[list[Option], int]], option: GameState
+) -> bool:
     """
     :param options:     The current list of potential moves
     :param option:      The option to be added
@@ -186,7 +212,7 @@ def contains_symmetries(options: List[Tuple[List[Option], int]], option: GameSta
     )
 
 
-def get_symmetries(matrix: np.ndarray) -> List[np.ndarray]:
+def get_symmetries(matrix: np.ndarray) -> list[np.ndarray]:
     """
     :param matrix:  A 2D matrix
     :return:        All flips and rotations of :matrix:z
@@ -197,8 +223,13 @@ def get_symmetries(matrix: np.ndarray) -> List[np.ndarray]:
     return rotations + flips + rotated_flips
 
 
-def get_playable_moves(option: GameState, pieces_set: Set[Piece], i: int, j: int,
-                       blacklist: List[Union[bool, int]]) -> List[Option]:
+def get_playable_moves(
+    option: GameState,
+    pieces_set: set[Piece],
+    i: int,
+    j: int,
+    blacklist: list[bool | int],
+) -> list[Option]:
     """
     Checks what pieces can be given to the next player without them winning
 
@@ -209,23 +240,42 @@ def get_playable_moves(option: GameState, pieces_set: Set[Piece], i: int, j: int
     :param blacklist:   A piece attribute blacklist generated by the evaluate function
     :return:            A list of all playable moves with :option: as its GameState
     """
-    options = [Option(option.board, piece, i, j) for piece in pieces_set
-               if not shared_attributes(piece.attributes, blacklist)]
-    return options if len(options) > 0 else [Option(option.board, tuple(pieces_set)[0], i, j)]
+    options = [
+        Option(option.board, piece, i, j)
+        for piece in pieces_set
+        if not shared_attributes(piece.attributes, blacklist)
+    ]
+    return (
+        options
+        if len(options) > 0
+        else [Option(option.board, tuple(pieces_set)[0], i, j)]
+    )
 
 
-def shared_attributes(attributes: Tuple[bool, ...], blacklist: List[Union[bool, int]]) -> bool:
+def shared_attributes(
+    attributes: tuple[bool, ...], blacklist: list[bool | int]
+) -> bool:
     """
     :param attributes:  A list of a pieces attributes
     :param blacklist:   A list of a second piece's attributes
     :return:            If :attributes: and :blacklist: have any shared attributes
     """
     assert len(attributes) == len(blacklist) == Piece.NUM_OF_ATTRIBUTES
-    return any(blacklist[i] == BOTH_ATTRIBUTES or attributes[i] == blacklist[i] for i in range(Piece.NUM_OF_ATTRIBUTES))
+    return any(
+        blacklist[i] == BOTH_ATTRIBUTES or attributes[i] == blacklist[i]
+        for i in range(Piece.NUM_OF_ATTRIBUTES)
+    )
 
 
-def iterative_deepening(board: GameState, piece: Piece, pieces_set: Set[Piece], sign: int,
-                        alpha: float, beta: float, max_depth: int) -> Option:
+def iterative_deepening(
+    board: GameState,
+    piece: Piece,
+    pieces_set: set[Piece],
+    sign: int,
+    alpha: float,
+    beta: float,
+    max_depth: int,
+) -> Option:
     """
     :param board:       The current GameState
     :param piece:       The piece to use in the turn
@@ -239,12 +289,14 @@ def iterative_deepening(board: GameState, piece: Piece, pieces_set: Set[Piece], 
     .. seealso::        https://www.chessprogramming.org/Iterative_Deepening
     """
     if max_depth <= 0:
-        raise ValueError(':max_depth: has to be a positive integer!')
+        raise ValueError(":max_depth: has to be a positive integer!")
     start_time = time()
     best_move = None
     depth, run_time = 0, 0
     while best_move is None or (depth <= max_depth and 1.5 * run_time < MAX_TIME):
-        best_move, score = alpha_beta(Option(board, piece), deepcopy(pieces_set), sign, alpha, beta, depth)
+        best_move, score = alpha_beta(
+            Option(board, piece), deepcopy(pieces_set), sign, alpha, beta, depth
+        )
         if evaluate(best_move.game_state)[0] >= MAX_SCORE:
             break
         depth += 1
@@ -252,8 +304,14 @@ def iterative_deepening(board: GameState, piece: Piece, pieces_set: Set[Piece], 
     return best_move
 
 
-def alpha_beta(move: Option, pieces_set: Set[Piece], sign: int, alpha: float, beta: float,
-               depth: int) -> Tuple[Option, int]:
+def alpha_beta(
+    move: Option,
+    pieces_set: set[Piece],
+    sign: int,
+    alpha: float,
+    beta: float,
+    depth: int,
+) -> tuple[Option, int]:
     """
     :param move:        An option object generated by get_options or iterative_deepening
     :param pieces_set:  A set of all piece that can be played
@@ -299,5 +357,7 @@ def alpha_beta(move: Option, pieces_set: Set[Piece], sign: int, alpha: float, be
     assert best_option is not None and best_score != -inf
 
     flag = Transposition.get_flag(best_score, original_alpha, beta)
-    GameState.transposition_table[move] = Transposition(best_option, best_score, flag, depth)
+    GameState.transposition_table[move] = Transposition(
+        best_option, best_score, flag, depth
+    )
     return best_option, best_score

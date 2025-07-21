@@ -53,6 +53,7 @@ skip-magic-trailing-comma = false
 # Sort imports
 known-first-party = ["src"]
 force-sort-within-sections = true
+required-imports = ["from __future__ import annotations"]
 
 [tool.bandit]
 # Bandit security linter configuration

@@ -4,9 +4,10 @@ Module main.py
 
 This module contains the source code of the main kivy app and it's runtime code
 """
+from __future__ import annotations
 
-__version__ = '1.2.2'
-__author__ = 'Eric G.D'
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
 import os
 
@@ -36,7 +37,7 @@ class QuartoApp(App):
     instructions: Instructions = None
     pause_menu: PauseMenu = None
     paused: bool = False
-    CONFIG_FILE: str = 'kivy_config.ini'
+    CONFIG_FILE: str = "kivy_config.ini"
 
     @staticmethod
     def get_screen_manager() -> ScreenManager:
@@ -46,11 +47,15 @@ class QuartoApp(App):
         """
         if QuartoApp.sm is None:
             QuartoApp.sm = ScreenManager(transition=SlideTransition())
-            QuartoApp.sm.add_widget(MainMenuScreen(name='menu'))
-            QuartoApp.sm.add_widget(PlayMenuScreen(name='play'))
-            QuartoApp.sm.add_widget(DifficultyMenuScreen(name='diff'))
-            QuartoApp.sm.add_widget(GameScreen(name='sp', game_mode=GameMode.single_player))
-            QuartoApp.sm.add_widget(GameScreen(name='mp', game_mode=GameMode.multi_player))
+            QuartoApp.sm.add_widget(MainMenuScreen(name="menu"))
+            QuartoApp.sm.add_widget(PlayMenuScreen(name="play"))
+            QuartoApp.sm.add_widget(DifficultyMenuScreen(name="diff"))
+            QuartoApp.sm.add_widget(
+                GameScreen(name="sp", game_mode=GameMode.single_player)
+            )
+            QuartoApp.sm.add_widget(
+                GameScreen(name="mp", game_mode=GameMode.multi_player)
+            )
         return QuartoApp.sm
 
     @staticmethod
@@ -60,7 +65,9 @@ class QuartoApp(App):
         :return:    A reference to QuartoApp.instructions
         """
         if QuartoApp.instructions is None:
-            QuartoApp.instructions = Instructions(os.path.join('assets', 'instructions.jpg'))
+            QuartoApp.instructions = Instructions(
+                os.path.join("assets", "instructions.jpg")
+            )
         return QuartoApp.instructions
 
     @staticmethod
@@ -75,19 +82,21 @@ class QuartoApp(App):
         return QuartoApp.pause_menu
 
     @staticmethod
-    def setup_logging(level: str = 'info', enabled: bool = True) -> None:
+    def setup_logging(level: str = "info", enabled: bool = True) -> None:
         """
         Sets up the program's logger
         :param level:   The logging level to set
         :param enabled: Whether to enable logging or not
         :return:        None
         """
-        enable_value = 1 if enabled else 0  # Written explicitly for readability instead of int(enabled)
-        Config.set('kivy', 'log_enable', enable_value)
-        Config.set('kivy', 'log_maxfiles', 20)
-        Config.set('kivy', 'log_level', level)
-        Config.set('kivy', 'log_dir', 'logs')
-        Config.set('kivy', 'log_name', "quarto_log_%y-%m-%d_%_.txt")
+        enable_value = (
+            1 if enabled else 0
+        )  # Written explicitly for readability instead of int(enabled)
+        Config.set("kivy", "log_enable", enable_value)
+        Config.set("kivy", "log_maxfiles", 20)
+        Config.set("kivy", "log_level", level)
+        Config.set("kivy", "log_dir", "logs")
+        Config.set("kivy", "log_name", "quarto_log_%y-%m-%d_%_.txt")
 
     @staticmethod
     def set_config() -> None:
@@ -97,8 +106,8 @@ class QuartoApp(App):
         """
         Config.read(QuartoApp.CONFIG_FILE)
         QuartoApp.setup_logging(enabled=True)
-        Config.set('kivy', 'exit_on_escape', 0)
-        Config.set('graphics', 'fullscreen', 0)
+        Config.set("kivy", "exit_on_escape", 0)
+        Config.set("graphics", "fullscreen", 0)
         Config.write()
         Config.update_config(QuartoApp.CONFIG_FILE)
 
@@ -111,11 +120,11 @@ class QuartoApp(App):
         QuartoApp.setup_instructions()
         QuartoApp.setup_pause_menu()
         QuartoApp.keyboard = Keyboard(self)
-        self.title = 'Quarto'
-        self.icon = os.path.join('assets', 'icon.png')
+        self.title = "Quarto"
+        self.icon = os.path.join("assets", "icon.png")
         return QuartoApp.get_screen_manager()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     QuartoApp.set_config()
     QuartoApp().run()

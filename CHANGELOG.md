@@ -28,7 +28,7 @@
 
 ### Removed:
 
-- Removed redundant Quarto.set_cwd() function 
+- Removed redundant Quarto.set_cwd() function
 
 
 ## Beta [v1.2.1] - 2020-03-29
@@ -66,10 +66,10 @@
     - Changed the image background instead of foreground when selecting or confirming pieces
     - Updated piece images
     - Updated Icon
-- Added more difficulty options 
+- Added more difficulty options
 (Note that the game get stuck at very hard or higher)
 - Implemented symmetric gamestate detection (Starting options from 420 to 126)
-    
+
 ### Changed:
 - Moved from minimax to negamax algorithm
 - Changed Option implementation so that the gamestate is stored as a numpy array
@@ -127,7 +127,7 @@ buttons were pressed multiple times
 ### Changed:
 - Moved logs into /logs/ directory
 - Changed background color of the playing board and pieces bar
-- Redesigned pieces images so they look like they are in a tile and are easier to separate 
+- Redesigned pieces images so they look like they are in a tile and are easier to separate
 - Created a new class for the endgame message and moved its declaration to the .kv file
 - Updated .gitignore
 - Implemented more explicit error messages

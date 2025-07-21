@@ -7,15 +7,16 @@ Contains the Option class
 
 from __future__ import annotations
 
-__version__ = '1.3'
-__author__ = 'Eric G.D'
+__version__ = "1.3"
+__author__ = "Eric G.D"
 
+from collections.abc import Iterable
 from random import getrandbits
-from typing import Any, Dict, Iterable, List, Tuple, Union
+from typing import Any
 
 import numpy as np
 
-from src.constants import TTFlag, NO_INDEX, HASH_BITS
+from src.constants import HASH_BITS, NO_INDEX, TTFlag
 from src.piece import Piece
 
 
@@ -27,21 +28,31 @@ class Option:
     Contains all the data of a single option (move) the computer can make
     """
 
-    def __init__(self, game_state: Union[GameState, np.ndarray], piece: Piece, i: int = NO_INDEX, j: int = NO_INDEX):
-        self.__game_state: GameState = game_state if isinstance(game_state, GameState) else GameState(game_state)
+    def __init__(
+        self,
+        game_state: GameState | np.ndarray,
+        piece: Piece,
+        i: int = NO_INDEX,
+        j: int = NO_INDEX,
+    ):
+        self.__game_state: GameState = (
+            game_state if isinstance(game_state, GameState) else GameState(game_state)
+        )
         self.__piece: Piece = piece
-        self.__index: Tuple[int, int] = (i, j)
+        self.__index: tuple[int, int] = (i, j)
 
     def __repr__(self) -> str:
-        return 'Option({0!r}, {1!r}, {2[0]}, {2[1]})'.format(self.__game_state, self.__piece, self.__index)
+        return f"Option({self.__game_state!r}, {self.__piece!r}, {self.__index[0]}, {self.__index[1]})"
 
     def __hash__(self) -> int:
         return hash(self.__game_state) ^ GameState.selected_table[self.__piece.id]
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Option) \
-               and self.__game_state == other.__game_state \
-               and self.__piece == other.piece
+        return (
+            isinstance(other, Option)
+            and self.__game_state == other.__game_state
+            and self.__piece == other.piece
+        )
 
     def is_valid(self) -> bool:
         """
@@ -54,7 +65,7 @@ class Option:
         return self.__game_state
 
     @property
-    def index(self) -> Tuple[int, int]:
+    def index(self) -> tuple[int, int]:
         return self.__index
 
     @property
@@ -71,7 +82,6 @@ class Option:
 
 
 class Transposition:
-
     def __init__(self, move: Option, value: int, flag: TTFlag, depth: int):
         self.__move: Option = move
         self.__value: int = value
@@ -79,7 +89,7 @@ class Transposition:
         self.__depth: int = depth
 
     def __repr__(self) -> str:
-        return f'Transposition({self.__value}, {str(self.__flag)}, {self.__depth})'
+        return f"Transposition({self.__value}, {str(self.__flag)}, {self.__depth})"
 
     @staticmethod
     def get_flag(value: int, alpha: float, beta: float) -> TTFlag:
@@ -90,7 +100,7 @@ class Transposition:
         :return:        The transposition flag for the current search
         """
         if alpha > beta:
-            raise ValueError(':alpha: cannot be greater than :beta:!')
+            raise ValueError(":alpha: cannot be greater than :beta:!")
         if value <= alpha:
             return TTFlag.upper_bound
         if value >= beta:
@@ -116,13 +126,15 @@ class Transposition:
 
 class GameState:
     LENGTH: int = 4
-    zobrist_table: List[List[List[int]]] = []
-    selected_table: List[int] = []
-    transposition_table: Dict[Option, Transposition] = {}
+    zobrist_table: list[list[list[int]]] = []
+    selected_table: list[int] = []
+    transposition_table: dict[Option, Transposition] = {}
 
-    def __init__(self, state: Union[np.ndarray, List[List[Piece]]]):
+    def __init__(self, state: np.ndarray | list[list[Piece]]):
         if not len(state) == len(state[0]) == GameState.LENGTH:
-            raise ValueError('Invalid dimensions for :state:, should be a {0}x{0} array!'.format(GameState.LENGTH))
+            raise ValueError(
+                f"Invalid dimensions for :state:, should be a {GameState.LENGTH}x{GameState.LENGTH} array!"
+            )
         self.__board: np.ndarray = np.array(state)
         if not GameState.zobrist_table:
             GameState.__zobrist_init()
@@ -160,7 +172,7 @@ class GameState:
         return len(self.board)
 
     def __repr__(self) -> str:
-        return 'Gamestate({0!r})'.format(self.__board.tolist())
+        return f"Gamestate({self.__board.tolist()!r})"
 
     @staticmethod
     def __zobrist_init() -> None:
@@ -168,7 +180,16 @@ class GameState:
         Initialises the zobrist table with random 64 bit numbers
         :return:    None
         """
-        table = [[[getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For pieces in the board
-                  for _ in range(GameState.LENGTH)] for _ in range(GameState.LENGTH)]
+        table = [
+            [
+                [
+                    getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)
+                ]  # For pieces in the board
+                for _ in range(GameState.LENGTH)
+            ]
+            for _ in range(GameState.LENGTH)
+        ]
         GameState.zobrist_table[:] = table
-        GameState.selected_table[:] = [getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)]  # For selected piece
+        GameState.selected_table[:] = [
+            getrandbits(HASH_BITS) for _ in range(Piece.MAX_NUM + 1)
+        ]  # For selected piece

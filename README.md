@@ -44,13 +44,13 @@ This will start the Kivy application and allow you to play Quarto.
 
 ## Features
 
-* **Advanced AI Opponent**: 
+* **Advanced AI Opponent**:
   - NegaMax algorithm with alpha-beta pruning
   - Transposition tables for move optimization
   - Iterative deepening for time-controlled search
   - Symmetry detection to reduce search space
   - Multiple difficulty levels
-* **Game Modes**: 
+* **Game Modes**:
   - Single-player vs AI
   - Two-player local multiplayer
 * **User Interface**:
