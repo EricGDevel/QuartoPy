@@ -14,7 +14,9 @@ import random
 from copy import deepcopy
 from math import inf
 from time import time
-from typing import Set
+from typing import Set, Tuple, List, Union
+
+import numpy as np
 
 from src.constants import MAX_SCORE, MAX_TIME, NO_ATTRIBUTES, BOTH_ATTRIBUTES
 from src.option import *

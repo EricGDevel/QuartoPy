@@ -6,6 +6,7 @@ This module contains all the Screen objects and the widgets that they use,
 that are in turn used by the App's ScreenManager
 """
 
+from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -85,9 +86,11 @@ class Instructions(Popup):
     A popup that contains the rules of the game
     """
 
+    image_path = StringProperty("")
+
     def __init__(self, src: str, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = src
+        self.image_path = src
 
 
 class PauseMenu(Popup):

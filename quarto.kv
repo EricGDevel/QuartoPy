@@ -1,4 +1,4 @@
-#: kivy 1.11.0
+#: kivy 2.3.1
 #: import exit sys.exit
 #: import colors src.constants.Colors
 #: set default_fs 24
@@ -23,20 +23,17 @@
             size: self.size
 
 <Cell>:
-    allow_stretch: True
-    keep_ratio: True
+    fit_mode: "contain"
 
 <Message>:
     title: 'Game Over!'
     size_hint: 0.625, 0.625
     auto_dismiss: False
 
-    message: message
-
     BoxLayout:
         orientation: 'vertical'
         Label:
-            id: message
+            text: root.message_text
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: 0.75
@@ -57,14 +54,11 @@
     size_hint: 0.8, 0.8
     auto_dismiss: True
 
-    img: img
-
     BoxLayout:
         orientation: 'vertical'
         AsyncImage:
-            allow_stretch: True
-            keep_ratio: True
-            id: img
+            fit_mode: "contain"
+            source: root.image_path
         Button:
             text: 'Close'
             size_hint_y: 0.5

@@ -19,7 +19,7 @@ from src.constants import GameMode
 from src.keyboard import Keyboard
 from src.screens import *
 
-kivy.require('1.11.0')
+kivy.require("2.3.1")
 
 
 class QuartoApp(App):

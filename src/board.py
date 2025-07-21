@@ -16,6 +16,7 @@ from typing import Dict, List, Set, Union
 
 from kivy.clock import mainthread
 from kivy.core.window import Window
+from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
@@ -28,7 +29,7 @@ from src.piece import *
 
 
 class Message(Popup):
-    pass
+    message_text = StringProperty("")
 
 
 class Board(GridLayout):
@@ -195,7 +196,7 @@ class Board(GridLayout):
         """
         if self.end_message is None:
             self.end_message = Message()
-        self.end_message.message.text = message
+        self.end_message.message_text = message
         self.end_message.open()
 
     def reset(self) -> None:
