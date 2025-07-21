@@ -4,11 +4,12 @@ Module constants.py
 
 This module contains all the enums and constants used by the other modules of the project
 """
+
 from __future__ import annotations
 
 from enum import Enum
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 MAX_SCORE: int = 10**5

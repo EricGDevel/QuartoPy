@@ -15,7 +15,7 @@ __all__ = [
     "pick_best",
     "pick_starting_piece",
 ]
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 from copy import deepcopy

@@ -22,7 +22,7 @@ from kivy.uix.widget import Widget
 from src.board import PiecesBar
 from src.screens import GameScreen
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 

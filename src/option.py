@@ -7,7 +7,7 @@ Contains the Option class
 
 from __future__ import annotations
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 from collections.abc import Iterable

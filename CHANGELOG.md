@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Release [v1.4.0] - 2025-07-21
+
+### Changed:
+- Updated minimum Python version requirement to 3.11+
+- Application ported to Kivy 2.3.1
+
+### Infrastructure:
+- Added pre-commit hooks
+- Configured tooling in pyproject.toml
+- Updated .gitignore
+- Licensed under MIT license
+- Updated README.md
+
 ## Beta [v1.3] - 2020-05-12
 
 ## Changed:

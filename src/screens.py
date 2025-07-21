@@ -18,7 +18,7 @@ from kivy.uix.screenmanager import Screen
 
 from src.board import Board
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 

@@ -7,8 +7,10 @@ This module contains the source code of the main kivy app and it's runtime code
 
 from __future__ import annotations
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
+__license__ = "MIT"
+__description__ = "An implementation of the Quarto board game in Python using Kivy"
 
 from pathlib import Path
 

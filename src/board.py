@@ -8,7 +8,7 @@ Note: Board contains all game functions that don't relate to AI
 
 from __future__ import annotations
 
-__version__ = "1.3"
+__version__ = "1.4.0"
 __author__ = "Eric G.D"
 
 from copy import deepcopy
