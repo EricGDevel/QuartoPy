@@ -73,4 +73,4 @@ Contributions are welcome! Please submit pull requests or report issues on the G
 ## Acknowledgments
 
 * **Quarto** is a registered trademark of **Gigamic**.
-* This project is inspired by the original **Quarto** board game and its innovative design by **Bruno Cathala** and **Marc Rivière**.
+* This project is inspired by the original **Quarto** board game and its innovative design by **Blaise Müller**.
