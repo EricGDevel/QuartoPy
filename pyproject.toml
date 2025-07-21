@@ -1,0 +1,11 @@
+[project]
+name = "quartopy"
+version = "1.1.0"
+description = "An implementation of the Quarto board game in Python using Kivy"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "kivy[full]",
+    "filetype", # Required by kivy but not installed
+    "numpy",
+]
